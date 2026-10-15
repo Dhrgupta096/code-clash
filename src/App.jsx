@@ -209,6 +209,7 @@ export default function App() {
                 simState={simState}
                 setSimState={setSimState}
                 onOpenPlaybook={() => handleModeTransition('playbook')}
+                playSound={playSound}
               />
             )}
 

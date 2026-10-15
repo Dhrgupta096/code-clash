@@ -4,8 +4,9 @@ import ShinyText from './reactbits/ShinyText';
 import SpotlightCard from './reactbits/SpotlightCard';
 import Magnet from './reactbits/Magnet';
 import MicrogridLoadChart from './MicrogridLoadChart';
+import FleetRouteTelemetry from './FleetRouteTelemetry';
 
-export default function SimulatorPanel({ simState, setSimState, onOpenPlaybook }) {
+export default function SimulatorPanel({ simState, setSimState, onOpenPlaybook, playSound }) {
   const [activeBranch, setActiveBranch] = useState('alpha');
 
   // Mathematical Emission Reduction Calculations
@@ -354,6 +355,13 @@ export default function SimulatorPanel({ simState, setSimState, onOpenPlaybook }
         </div>
       </SpotlightCard>
       </div>
+
+      {/* DSU Transit Fleet Empirical Route Matrix & Live Scope 1 Telemetry */}
+      <FleetRouteTelemetry
+        simState={simState}
+        setSimState={setSimState}
+        playSound={playSound}
+      />
 
       {/* Action CTA: Push into GenAI Playbook */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', paddingBottom: '24px' }}>
