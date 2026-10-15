@@ -1,10 +1,30 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
-import { Globe2, Zap, ArrowRight, Activity, ShieldCheck, Sun, Target, Layers, Minimize2, ChevronUp, ChevronDown } from 'lucide-react';
+import { 
+  Globe2, 
+  Zap, 
+  ArrowRight, 
+  Activity, 
+  ShieldCheck, 
+  Sun, 
+  Target, 
+  Layers, 
+  Minimize2, 
+  ChevronUp, 
+  ChevronDown, 
+  Search, 
+  MapPin, 
+  Navigation,
+  Compass,
+  Radio,
+  ExternalLink,
+  Sparkles
+} from 'lucide-react';
 import OptionWheel from './reactbits/OptionWheel';
 import ShinyText from './reactbits/ShinyText';
 import SpotlightCard from './reactbits/SpotlightCard';
 import Magnet from './reactbits/Magnet';
+import GoogleMapsInspector, { GLOBAL_PRESETS, classifyEarthLocation } from './GoogleMapsInspector';
 
 // Real-world electricity grid regional emission factors (gCO2/kWh)
 const REGIONS = [
@@ -85,8 +105,62 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(true);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
 
+  // Google Maps Recon & Targeting State
+  const [isInspectorOpen, setIsInspectorOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState({
+    lat: 12.6521,
+    lon: 77.4411,
+    source: 'preset'
+  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+
   const targetRotationRef = useRef({ y: REGIONS[0].rot.y, x: REGIONS[0].rot.x });
+  const beaconGroupRef = useRef(null);
   const selectedRegion = REGIONS[selectedRegionIndex];
+
+  // Helper to convert lat/lon to Three.js 3D Vector on globe sphere
+  const latLonToVector3 = useCallback((lat, lon, radius = 60) => {
+    const phi = (90 - lat) * (Math.PI / 180);
+    const theta = (lon + 180) * (Math.PI / 180);
+    return new THREE.Vector3(
+      -radius * Math.sin(phi) * Math.cos(theta),
+      radius * Math.cos(phi),
+      radius * Math.sin(phi) * Math.sin(theta)
+    );
+  }, []);
+
+  // Update 3D Beacon and Reticle Position
+  const updateBeacon = useCallback((lat, lon) => {
+    if (!beaconGroupRef.current) return;
+    const pos = latLonToVector3(lat, lon, 60.4);
+    beaconGroupRef.current.position.copy(pos);
+    const normal = pos.clone().normalize();
+    beaconGroupRef.current.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+    beaconGroupRef.current.visible = true;
+  }, [latLonToVector3]);
+
+  // Rotate Earth Sphere smoothly to face given coordinates
+  const orientGlobeToCoords = useCallback((lat, lon) => {
+    targetRotationRef.current = {
+      y: 2.85 + (lon * Math.PI) / 180,
+      x: (lat * Math.PI) / 180 * 0.9
+    };
+  }, []);
+
+  // Master handler for selecting any location on Earth
+  const handleSelectLocation = useCallback((lat, lon, source = 'click', customName = null) => {
+    if (playSound) playSound(880, 'sine', 0.08);
+    updateBeacon(lat, lon);
+    orientGlobeToCoords(lat, lon);
+    setSelectedLocation({
+      lat: parseFloat(lat.toFixed(4)),
+      lon: parseFloat(lon.toFixed(4)),
+      source,
+      name: customName
+    });
+    setIsInspectorOpen(true);
+  }, [playSound, updateBeacon, orientGlobeToCoords]);
 
   // Live dynamic fluctuation ticker
   useEffect(() => {
@@ -101,8 +175,64 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
   const handleSelectRegion = (index) => {
     setSelectedRegionIndex(index);
     const reg = REGIONS[index];
-    if (reg && reg.rot) {
-      targetRotationRef.current = { y: reg.rot.y, x: reg.rot.x };
+    if (reg) {
+      handleSelectLocation(reg.lat, reg.lon, 'region', reg.name);
+    }
+  };
+
+  // Search input handler
+  const handleSearchSubmit = async (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    const query = searchQuery.trim().toLowerCase();
+
+    // 1. Check if user entered direct coordinates like "12.65, 77.44"
+    const coordMatch = query.match(/^([-+]?[0-9]*\.?[0-9]+)[,\s]+([-+]?[0-9]*\.?[0-9]+)$/);
+    if (coordMatch) {
+      const pLat = parseFloat(coordMatch[1]);
+      const pLon = parseFloat(coordMatch[2]);
+      if (pLat >= -90 && pLat <= 90 && pLon >= -180 && pLon <= 180) {
+        handleSelectLocation(pLat, pLon, 'search', `Coordinates [${pLat.toFixed(2)}, ${pLon.toFixed(2)}]`);
+        return;
+      }
+    }
+
+    // 2. Check local presets
+    const matchedPreset = GLOBAL_PRESETS.find(p => 
+      p.name.toLowerCase().includes(query) || 
+      p.subtext.toLowerCase().includes(query) ||
+      (query === 'dsu' && p.isCampus) ||
+      (query.includes('dayananda') && p.isCampus) ||
+      (query.includes('harohalli') && p.isCampus) ||
+      (query.includes('solar') && p.name.includes('Solar'))
+    );
+
+    if (matchedPreset) {
+      handleSelectLocation(matchedPreset.lat, matchedPreset.lon, 'search', matchedPreset.name);
+      return;
+    }
+
+    // 3. Online Geocoding Search via OpenStreetMap Nominatim
+    setIsSearching(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
+        headers: { 'Accept-Language': 'en' }
+      });
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const place = data[0];
+        const sLat = parseFloat(place.lat);
+        const sLon = parseFloat(place.lon);
+        handleSelectLocation(sLat, sLon, 'search', place.display_name.split(',')[0]);
+      } else {
+        // Fallback to DSU Campus if not found
+        handleSelectLocation(12.6521, 77.4411, 'search', 'Dayananda Sagar University (DSU)');
+      }
+    } catch {
+      handleSelectLocation(12.6521, 77.4411, 'search', 'Dayananda Sagar University (DSU)');
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -189,22 +319,10 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
     rimLight.position.set(-150, -50, -80);
     scene.add(rimLight);
 
-    // 5. Global Power Grid Lat/Lon Coordinate Helper
-    const latLonToVector3 = (lat, lon, radius) => {
-      const phi = (90 - lat) * (Math.PI / 180);
-      const theta = (lon + 180) * (Math.PI / 180);
-      return new THREE.Vector3(
-        -radius * Math.sin(phi) * Math.cos(theta),
-        radius * Math.cos(phi),
-        radius * Math.sin(phi) * Math.sin(theta)
-      );
-    };
-
-    // 6. Interactive 3D Beacon Markers
+    // 5. Preset Region Markers
     const markerMeshes = [];
     REGIONS.forEach((region) => {
       const pos = latLonToVector3(region.lat, region.lon, 61.2);
-
       const color = region.status === 'optimal' ? 0xd4ff00 : (region.status === 'dirty' ? 0xff5500 : 0x00f0ff);
       const dotGeo = new THREE.SphereGeometry(1.2, 16, 16);
       const dotMat = new THREE.MeshBasicMaterial({ color });
@@ -221,6 +339,62 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
 
       markerMeshes.push({ dot, ring, region });
     });
+
+    // 6. Dynamic Cybernetic Targeting Laser Beacon Group
+    const beaconGroup = new THREE.Group();
+    beaconGroup.visible = false;
+    beaconGroupRef.current = beaconGroup;
+    globeGroup.add(beaconGroup);
+
+    // Base pulsing dot
+    const beaconDotGeo = new THREE.SphereGeometry(1.5, 24, 24);
+    const beaconDotMat = new THREE.MeshBasicMaterial({ color: 0xd4ff00 });
+    const beaconDot = new THREE.Mesh(beaconDotGeo, beaconDotMat);
+    beaconGroup.add(beaconDot);
+
+    // Expanding shockwave ring
+    const beaconRingGeo = new THREE.RingGeometry(2.0, 3.8, 32);
+    const beaconRingMat = new THREE.MeshBasicMaterial({ 
+      color: 0x38bdf8, 
+      side: THREE.DoubleSide, 
+      transparent: true, 
+      opacity: 0.9 
+    });
+    const beaconRing = new THREE.Mesh(beaconRingGeo, beaconRingMat);
+    beaconRing.rotation.x = Math.PI / 2;
+    beaconGroup.add(beaconRing);
+
+    // Vertical Laser Beacon Beam pointing into space
+    const beamGeo = new THREE.CylinderGeometry(0.35, 0.75, 20, 16);
+    beamGeo.translate(0, 10, 0);
+    const beamMat = new THREE.MeshBasicMaterial({ 
+      color: 0x38bdf8, 
+      transparent: true, 
+      opacity: 0.7, 
+      blending: THREE.AdditiveBlending 
+    });
+    const beaconBeam = new THREE.Mesh(beamGeo, beamMat);
+    beaconGroup.add(beaconBeam);
+
+    // Orbital Reticle Diamond at beacon tip
+    const reticleGeo = new THREE.RingGeometry(3.5, 4.2, 4);
+    const reticleMat = new THREE.MeshBasicMaterial({ 
+      color: 0xd4ff00, 
+      side: THREE.DoubleSide, 
+      transparent: true, 
+      opacity: 0.85 
+    });
+    const beaconReticle = new THREE.Mesh(reticleGeo, reticleMat);
+    beaconReticle.position.set(0, 20, 0);
+    beaconReticle.rotation.x = Math.PI / 2;
+    beaconGroup.add(beaconReticle);
+
+    // Initial Beacon set to DSU Campus
+    const initialPos = latLonToVector3(12.6521, 77.4411, 60.4);
+    beaconGroup.position.copy(initialPos);
+    const initialNormal = initialPos.clone().normalize();
+    beaconGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), initialNormal);
+    beaconGroup.visible = true;
 
     // 7. Space Particles Dust
     const starsGeo = new THREE.BufferGeometry();
@@ -240,13 +414,55 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
     globeGroup.rotation.y = targetRotationRef.current.y;
     globeGroup.rotation.x = targetRotationRef.current.x;
 
-    // Mouse Drag Rotation
+    // Raycaster for Earth Click Detection
+    const raycaster = new THREE.Raycaster();
+    const mouseVec = new THREE.Vector2();
+
+    // Mouse Drag & Click Discrimination
     let isDragging = false;
     let prevMousePos = { x: 0, y: 0 };
+    let pointerDownPos = { x: 0, y: 0 };
+    let pointerDownTime = 0;
+
+    const performEarthRaycast = (clientX, clientY) => {
+      const rect = currentMount.getBoundingClientRect();
+      mouseVec.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      mouseVec.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouseVec, camera);
+      const intersects = raycaster.intersectObject(earthMesh, false);
+
+      if (intersects.length > 0) {
+        const hit = intersects[0];
+        // Convert world hit point to earth local coordinates
+        const localPoint = earthMesh.worldToLocal(hit.point.clone());
+        const radius = localPoint.length();
+        
+        // Inverted spherical trigonometry: local (x,y,z) -> (lat, lon)
+        const phi = Math.acos(Math.max(-1, Math.min(1, localPoint.y / radius)));
+        const lat = 90 - (phi * 180) / Math.PI;
+        const theta = Math.atan2(localPoint.z, -localPoint.x);
+        let lon = (theta * 180) / Math.PI - 180;
+        while (lon < -180) lon += 360;
+        while (lon > 180) lon -= 360;
+
+        handleSelectLocation(lat, lon, 'click');
+      }
+    };
 
     const handleMouseDown = (e) => {
-      if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('.option-wheel')) return;
+      if (
+        e.target.tagName === 'BUTTON' || 
+        e.target.closest('button') || 
+        e.target.tagName === 'INPUT' || 
+        e.target.closest('input') || 
+        e.target.closest('.option-wheel')
+      ) {
+        return;
+      }
       isDragging = true;
+      pointerDownPos = { x: e.clientX, y: e.clientY };
+      pointerDownTime = performance.now();
       prevMousePos = { x: e.clientX, y: e.clientY };
     };
 
@@ -261,11 +477,60 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
       prevMousePos = { x: e.clientX, y: e.clientY };
     };
 
-    const handleMouseUp = () => { isDragging = false; };
+    const handleMouseUp = (e) => {
+      if (isDragging) {
+        const moveDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+        const elapsed = performance.now() - pointerDownTime;
+        // If movement is subtle (< 6px) and duration < 380ms, register as deliberate click!
+        if (moveDist < 6 && elapsed < 380) {
+          performEarthRaycast(e.clientX, e.clientY);
+        }
+      }
+      isDragging = false;
+    };
+
+    // Mobile Touch Interaction
+    let touchStartPos = { x: 0, y: 0 };
+    let touchStartTime = 0;
+
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 1) {
+        touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        touchStartTime = performance.now();
+        prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        isDragging = true;
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (!isDragging || e.touches.length !== 1) return;
+      const deltaX = e.touches[0].clientX - prevMousePos.x;
+      const deltaY = e.touches[0].clientY - prevMousePos.y;
+      globeGroup.rotation.y += deltaX * 0.005;
+      globeGroup.rotation.x += deltaY * 0.005;
+      targetRotationRef.current.y = globeGroup.rotation.y;
+      targetRotationRef.current.x = globeGroup.rotation.x;
+      prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    };
+
+    const handleTouchEnd = (e) => {
+      if (e.changedTouches.length === 1) {
+        const touch = e.changedTouches[0];
+        const dist = Math.hypot(touch.clientX - touchStartPos.x, touch.clientY - touchStartPos.y);
+        const elapsed = performance.now() - touchStartTime;
+        if (dist < 8 && elapsed < 400) {
+          performEarthRaycast(touch.clientX, touch.clientY);
+        }
+      }
+      isDragging = false;
+    };
 
     currentMount.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
+    currentMount.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd);
 
     // Resize handler
     const handleResize = () => {
@@ -304,6 +569,15 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
         m.ring.material.opacity = 0.5 + Math.sin(elapsedTime * 3 + idx) * 0.35;
       });
 
+      // Animate active cybernetic beacon
+      if (beaconGroup.visible) {
+        const pulse = Math.sin(elapsedTime * 5);
+        beaconRing.scale.set(1.0 + pulse * 0.35, 1.0 + pulse * 0.35, 1);
+        beaconRingMat.opacity = 0.5 + pulse * 0.35;
+        beamMat.opacity = 0.55 + Math.sin(elapsedTime * 8) * 0.25;
+        beaconReticle.rotation.z += 0.025;
+      }
+
       renderer.render(scene, camera);
     };
 
@@ -314,26 +588,265 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
       currentMount.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      currentMount.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
       window.removeEventListener('resize', handleResize);
       if (currentMount.contains(renderer.domElement)) {
         currentMount.removeChild(renderer.domElement);
       }
       renderer.dispose();
     };
-  }, []);
+  }, [latLonToVector3, handleSelectLocation]);
 
   const currentDisplayCarbon = (selectedRegion.baseCarbon + liveJitter).toFixed(1);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
       {/* 3D Realistic WebGL Earth Canvas */}
-      <div ref={mountRef} style={{ width: '100%', height: '100%', cursor: 'grab' }} />
+      <div 
+        ref={mountRef} 
+        style={{ width: '100%', height: '100%', cursor: 'crosshair' }} 
+        title="Click ANY place on Earth to inspect in Google Maps Satellite!"
+      />
 
-      {/* Atmospheric Spatial Vignette & Subtle Scanlines (edolus.com inspired) */}
+      {/* Atmospheric Spatial Vignette & Subtle Scanlines */}
       <div className="spatial-vignette" />
       <div className="hud-scanlines" />
 
-      {/* Top-Left HUD Corner Bracket: Orbital Telemetry (drone.riotters.com inspired) */}
+      {/* Top Center: Global Place Search Bar & Quick Recon Presets */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '16px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '8px',
+          zIndex: 40,
+          width: '92%',
+          maxWidth: '680px'
+        }}
+      >
+        {/* Search Bar Form */}
+        <form
+          onSubmit={handleSearchSubmit}
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            background: 'rgba(7, 9, 14, 0.92)',
+            backdropFilter: 'blur(28px)',
+            WebkitBackdropFilter: 'blur(28px)',
+            border: '1px solid rgba(56, 189, 248, 0.35)',
+            borderRadius: '999px',
+            padding: '4px 6px 4px 14px',
+            boxShadow: '0 12px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.15)',
+            transition: 'border-color 0.2s ease'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+            <Search size={14} color="var(--cyan)" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search any place on Earth (e.g. Tokyo, Paris, DSU, 12.65, 77.44)..."
+              style={{
+                width: '100%',
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                color: 'var(--text-main)',
+                fontSize: '12px',
+                fontFamily: 'var(--font-ui)'
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              type="submit"
+              disabled={isSearching}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '999px',
+                background: 'var(--cyan)',
+                border: 'none',
+                color: '#07090e',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <span>{isSearching ? 'Recon...' : 'Locate'}</span>
+              <Navigation size={10} />
+            </button>
+          </div>
+        </form>
+
+        {/* Quick Location Chips Carousel */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            overflowX: 'auto',
+            width: '100%',
+            padding: '2px 4px',
+            scrollbarWidth: 'none',
+            justifyContent: 'center',
+            flexWrap: 'wrap'
+          }}
+        >
+          <button
+            onClick={() => handleSelectLocation(12.6521, 77.4411, 'preset', 'Dayananda Sagar University (DSU)')}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '999px',
+              background: 'rgba(212, 255, 0, 0.15)',
+              border: '1px solid rgba(212, 255, 0, 0.4)',
+              color: 'var(--phosphor)',
+              fontSize: '10px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <Sparkles size={10} />
+            <span>🏛️ DSU Harohalli Campus</span>
+          </button>
+
+          <button
+            onClick={() => handleSelectLocation(14.2810, 77.2514, 'preset', 'Pavagada Solar Park')}
+            style={{
+              padding: '4px 10px',
+              borderRadius: '999px',
+              background: 'rgba(56, 189, 248, 0.12)',
+              border: '1px solid rgba(56, 189, 248, 0.3)',
+              color: 'var(--cyan)',
+              fontSize: '10px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            ☀️ Pavagada 2,050 MW
+          </button>
+
+          <button
+            onClick={() => handleSelectLocation(12.9716, 77.5946, 'preset', 'Bangalore KPTCL SLDC')}
+            style={{
+              padding: '4px 9px',
+              borderRadius: '999px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: 'var(--text-secondary)',
+              fontSize: '10px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            ⚡ Bangalore SLDC
+          </button>
+
+          <button
+            onClick={() => handleSelectLocation(37.3382, -121.8863, 'preset', 'Silicon Valley')}
+            style={{
+              padding: '4px 9px',
+              borderRadius: '999px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: 'var(--text-secondary)',
+              fontSize: '10px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            🌉 Silicon Valley
+          </button>
+
+          <button
+            onClick={() => handleSelectLocation(48.8566, 2.3522, 'preset', 'Paris RTE Grid')}
+            style={{
+              padding: '4px 9px',
+              borderRadius: '999px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: 'var(--text-secondary)',
+              fontSize: '10px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            🗼 Paris RTE
+          </button>
+
+          <button
+            onClick={() => handleSelectLocation(35.6762, 139.6503, 'preset', 'Tokyo TEPCO')}
+            style={{
+              padding: '4px 9px',
+              borderRadius: '999px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: 'var(--text-secondary)',
+              fontSize: '10px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            🏙️ Tokyo TEPCO
+          </button>
+
+          <button
+            onClick={() => handleSelectLocation(25.1972, 55.2744, 'preset', 'Dubai Solar')}
+            style={{
+              padding: '4px 9px',
+              borderRadius: '999px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: 'var(--text-secondary)',
+              fontSize: '10px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            🏜️ Dubai Solar
+          </button>
+
+          <button
+            onClick={() => handleSelectLocation(64.1466, -21.9426, 'preset', 'Reykjavik Geothermal')}
+            style={{
+              padding: '4px 9px',
+              borderRadius: '999px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: 'var(--text-secondary)',
+              fontSize: '10px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            🏔️ Iceland 0g
+          </button>
+        </div>
+      </div>
+
+      {/* Top-Left HUD Corner Bracket: Orbital Telemetry */}
       <div className="hud-corner-box cyan" style={{
         position: 'absolute',
         top: '20px',
@@ -354,42 +867,53 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
           <span className="swiss-label" style={{ color: 'var(--cyan)' }}>[ORBITAL TELEMETRY // MERRA-2]</span>
         </div>
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-main)', display: 'flex', gap: '12px' }}>
-          <span>LAT <span className="mono-nums" style={{ color: 'var(--cyan)', fontWeight: 700 }}>{selectedRegion.lat}°</span></span>
-          <span>LON <span className="mono-nums" style={{ color: 'var(--cyan)', fontWeight: 700 }}>{selectedRegion.lon}°</span></span>
+          <span>LAT <span className="mono-nums" style={{ color: 'var(--cyan)', fontWeight: 700 }}>{selectedLocation.lat}°</span></span>
+          <span>LON <span className="mono-nums" style={{ color: 'var(--cyan)', fontWeight: 700 }}>{selectedLocation.lon}°</span></span>
           <span>ALT <span className="mono-nums" style={{ color: 'var(--text-pure)' }}>640 KM</span></span>
         </div>
       </div>
 
-      {/* Top-Right HUD Corner Bracket: Grid Telemetry (cominvi.com.mx inspired) */}
-      <div className="hud-corner-box" style={{
-        position: 'absolute',
-        top: '20px',
-        right: '24px',
-        padding: '9px 14px',
-        background: 'rgba(6, 8, 12, 0.8)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: '6px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-end',
-        gap: '4px',
-        zIndex: 20,
-        pointerEvents: 'none'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-          <span className="swiss-label" style={{ color: 'var(--phosphor)' }}>[KPTCL // SLDC DISPATCH]</span>
-          <span className="pulse-dot" />
-        </div>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-secondary)' }}>
-          PAVAGADA SOLAR <span style={{ color: 'var(--phosphor)', fontWeight: 700 }}>2,050 MW</span> • RTPS <span style={{ color: 'var(--text-pure)' }}>1,720 MW</span>
-        </div>
-      </div>
-
-      {/* Central Interactive Navigation Hint */}
+      {/* Top-Right HUD Corner: Google Maps Satellite Quick Launcher */}
       <div style={{
         position: 'absolute',
         top: '20px',
+        right: '24px',
+        zIndex: 30,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+      }}>
+        <button
+          onClick={() => {
+            if (playSound) playSound(800, 'sine', 0.08);
+            setIsInspectorOpen(!isInspectorOpen);
+          }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 14px',
+            borderRadius: '999px',
+            background: isInspectorOpen ? 'rgba(56, 189, 248, 0.25)' : 'rgba(7, 9, 14, 0.85)',
+            backdropFilter: 'blur(20px)',
+            border: isInspectorOpen ? '1px solid var(--cyan)' : '1px solid rgba(56, 189, 248, 0.4)',
+            color: 'var(--cyan)',
+            fontSize: '11px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.2)'
+          }}
+        >
+          <Radio size={13} className="animate-spin-slow" />
+          <span>{isInspectorOpen ? 'Close Satellite Recon' : 'Inspect in Google Maps'}</span>
+          <ExternalLink size={11} />
+        </button>
+      </div>
+
+      {/* Floating Center Interaction Callout */}
+      <div style={{
+        position: 'absolute',
+        bottom: '84px',
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
@@ -397,21 +921,22 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
         gap: '8px',
         padding: '6px 16px',
         borderRadius: '999px',
-        background: 'rgba(10, 12, 18, 0.75)',
+        background: 'rgba(8, 10, 16, 0.82)',
         backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        border: '1px solid rgba(212, 255, 0, 0.35)',
         fontSize: '11px',
-        color: 'var(--text-secondary)',
+        color: 'var(--text-main)',
         fontFamily: 'var(--font-mono)',
         pointerEvents: 'none',
         zIndex: 20,
-        boxShadow: '0 8px 24px rgba(0,0,0,0.5)'
+        boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
       }}>
         <span className="pulse-dot" />
-        <span style={{ letterSpacing: '0.04em' }}>DRAG TO ROTATE 360° • SCROLL TO ZOOM • CLICK NODE TO LOCK</span>
+        <span style={{ letterSpacing: '0.04em' }}>
+          CLICK ANY POINT ON EARTH TO ACCESS GOOGLE MAPS SATELLITE • DRAG TO ROTATE
+        </span>
       </div>
 
-      {/* Floating Left HUD: React Bits SpotlightCard with OptionWheel */}
       {/* Floating Left HUD: Global Grid Nodes Selector */}
       {isLeftCollapsed ? (
         <div style={{ position: 'absolute', bottom: '24px', left: '24px', zIndex: 20 }}>
@@ -465,7 +990,6 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
               </div>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                {/* View Mode Toggle: Wheel vs Tiles */}
                 <div style={{ display: 'flex', gap: '2px' }}>
                   <button
                     onClick={() => {
@@ -523,7 +1047,6 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
               </div>
             </div>
 
-            {/* OptionWheel from React Bits */}
             {hudMode === 'wheel' ? (
               <div style={{
                 height: '150px',
@@ -564,7 +1087,6 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
                 />
               </div>
             ) : (
-              /* Traditional Clean List View */
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px', maxHeight: '150px', overflowY: 'auto' }}>
                 {REGIONS.map((r, i) => {
                   const isSelected = selectedRegionIndex === i;
@@ -769,6 +1291,16 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
           </SpotlightCard>
         </div>
       )}
+
+      {/* Interactive Google Maps Satellite & Orbital Reconnaissance Inspector */}
+      <GoogleMapsInspector
+        isOpen={isInspectorOpen}
+        onClose={() => setIsInspectorOpen(false)}
+        location={selectedLocation}
+        onJumpCampus={onZoomCampus}
+        onSelectPreset={(p) => handleSelectLocation(p.lat, p.lon, 'preset', p.name)}
+        playSound={playSound}
+      />
     </div>
   );
 }
