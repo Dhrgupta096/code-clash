@@ -100,16 +100,6 @@ export default function App() {
         research: 920
       };
       playSound(soundMap[newMode] || 520, 'sine', 0.08);
-
-      if (typeof document !== 'undefined' && document.startViewTransition) {
-        try {
-          document.startViewTransition(() => {
-            setActiveMode(newMode);
-          });
-        } catch {
-          // If a view transition was already running or aborted, fail gracefully
-        }
-      }
       return newMode;
     });
   }, [playSound]);
@@ -118,16 +108,6 @@ export default function App() {
     setViewEngine(prev => {
       if (newEngine === prev) return prev;
       playSound(newEngine === 'campus' ? 680 : 520, 'triangle', 0.1);
-
-      if (typeof document !== 'undefined' && document.startViewTransition) {
-        try {
-          document.startViewTransition(() => {
-            setViewEngine(newEngine);
-          });
-        } catch {
-          // Fail gracefully
-        }
-      }
       return newEngine;
     });
   }, [playSound]);
