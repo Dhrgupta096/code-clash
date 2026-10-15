@@ -1053,6 +1053,12 @@ export default function ResearchDossier({ _simState = { fleetEv: 30, aiSolarShif
                 standard: "Centre for Ecological Sciences (CES) & CiSTUP",
                 title: "Carbon Footprint of Karnataka: Accounting of Sources and Sinks (Ramachandra T.V. & Bharath S.)",
                 body: "Comprehensive geospatial accounting of Karnataka's 150.65 Tg CO2e gross emissions vs 16.10 Tg ecosystem sequestration (10.7% state carbon ratio). Establishes standardized empirical vehicular emission factors for Karnataka (567.03 g CO2/km for diesel buses) and quantifies the economic value of Western Ghats carbon sinks at ₹34.0 Billion INR."
+              },
+              {
+                source: "Dayananda Sagar University (DSU) Official Registry",
+                standard: "Harohalli Campus 3D Photogrammetry & Virtual Tour (pano.xml)",
+                title: "Geospatial 3D Ground Truth, Building Envelopes & Microgrid Circuitry",
+                body: "Spatial ground truth mapping 140+ acres across 19 georeferenced aerial and structural nodes from https://www.dsu.edu.in/virtual-tour/. Establishes true GPS coordinates (12.657°N–12.663°N, 77.448°E–77.451°E), MSL elevations (657.9m–703.9m), building envelopes, and lab registries for the 3D WebGL Digital Twin."
               }
             ].map((c, i) => (
               <div key={i} style={{

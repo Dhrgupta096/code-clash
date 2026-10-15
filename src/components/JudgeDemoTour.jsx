@@ -37,11 +37,12 @@ const TOUR_STAGES = [
     tag: 'SPATIAL 3D TWIN',
     icon: Building2,
     color: 'var(--phosphor)',
-    summary: 'Autonomous 3D WebGL Digital Twin of Dayananda Sagar University campus with real-time solar generation, microgrid routing, and active LiDAR structural inspection.',
+    summary: 'Autonomous 3D WebGL Digital Twin of Dayananda Sagar University Harohalli campus (140+ acres) with authentic building footprints directly ingested from the official DSU Virtual Tour (pano.xml), real-time solar routing, and active LiDAR inspection.',
     bullets: [
-      'Autonomous LiDAR Laser Beam Sweep sweeping building envelope at ±1.8 cm tolerance.',
-      'Block C 350 kW Rooftop Solar PV dynamically feeding the DGX Supercomputing Lab.',
-      'One-click interactive facility camera focus with smooth spherical coordinate damping.'
+      'Official DSU Virtual Tour Ground Truth: 8 real campus sectors with GPS coordinates & MSL altitudes.',
+      'One-click [360° DSU PANORAMA] HUD launcher embedding live official Pano2VR tour nodes.',
+      'Autonomous LiDAR Laser Beam Sweep sweeping building envelope at ±1.4 cm tolerance.',
+      '350 kW Rooftop Solar PV dynamically feeding the NVIDIA DGX A100 AI Supercomputing Lab.'
     ]
   },
   {
