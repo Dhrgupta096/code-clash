@@ -188,7 +188,7 @@ export default function App() {
 
         {/* Main Tactical Workspace with Unique Quantum Page Transition */}
         <div style={{ flex: 1, display: 'flex', position: 'relative', overflow: 'hidden' }}>
-          <PageTransition pageKey={pageKey}>
+          <PageTransition pageKey={pageKey} soundEnabled={soundEnabled}>
             {/* OVERVIEW MODE: Full-Screen Pure Spatial Experience */}
             {activeMode === 'overview' && (
               <div style={{ width: '100%', height: '100%', position: 'relative' }}>

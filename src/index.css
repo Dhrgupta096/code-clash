@@ -680,6 +680,157 @@ input[type="range"]::-webkit-slider-thumb:hover {
   color: var(--phosphor);
 }
 
+/* ==========================================================================
+   CINEMATIC HYPERSPACE WARP DIVE & SRE TARGETING HUD (CREATIVE AF)
+   ========================================================================== */
+@keyframes edolusWarpDiveIn {
+  0% {
+    opacity: 0;
+    transform: perspective(1000px) translateZ(320px) scale(1.15) rotateX(-5deg);
+    filter: blur(14px) brightness(1.7) contrast(135%);
+  }
+  35% {
+    opacity: 0.85;
+    transform: perspective(1000px) translateZ(90px) scale(1.05) rotateX(-2deg);
+    filter: blur(5px) brightness(1.25);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1000px) translateZ(0) scale(1) rotateX(0deg);
+    filter: blur(0px) brightness(1) contrast(100%);
+  }
+}
+
+@keyframes edolusHudFade {
+  0% {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes edolusRingSpinClockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes edolusRingSpinCounter {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes edolusBracketsSnap {
+  0% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes edolusEqualizerBounce {
+  0%, 100% { height: 3px; }
+  50% { height: 12px; }
+}
+
+.edolus-chromatic-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(56, 189, 248, 0.03) 0px,
+    rgba(56, 189, 248, 0.03) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.edolus-hud-ring-outer {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  border: 1px dashed rgba(212, 255, 0, 0.35);
+  box-shadow: 0 0 30px rgba(212, 255, 0, 0.15), inset 0 0 30px rgba(212, 255, 0, 0.1);
+  animation: edolusRingSpinClockwise 4s linear infinite;
+  pointer-events: none;
+}
+
+.edolus-hud-ring-inner {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  border: 1.5px dotted rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+  animation: edolusRingSpinCounter 3s linear infinite;
+  pointer-events: none;
+}
+
+.edolus-hud-brackets {
+  position: absolute;
+  width: 360px;
+  height: 180px;
+  border: 2px solid transparent;
+  border-top-color: var(--phosphor);
+  border-bottom-color: var(--phosphor);
+  animation: edolusBracketsSnap 0.46s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+.edolus-hud-brackets::before,
+.edolus-hud-brackets::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+}
+.edolus-hud-brackets::before {
+  left: 0;
+  border-left: 2px solid var(--phosphor);
+}
+.edolus-hud-brackets::after {
+  right: 0;
+  border-right: 2px solid var(--phosphor);
+}
+
+.edolus-spectrum-bar {
+  width: 2.5px;
+  background: var(--phosphor);
+  border-radius: 999px;
+  box-shadow: 0 0 6px var(--phosphor);
+}
+.edolus-spectrum-bar.b1 { animation: edolusEqualizerBounce 0.4s infinite ease-in-out; }
+.edolus-spectrum-bar.b2 { animation: edolusEqualizerBounce 0.32s infinite ease-in-out 0.08s; }
+.edolus-spectrum-bar.b3 { animation: edolusEqualizerBounce 0.44s infinite ease-in-out 0.16s; }
+.edolus-spectrum-bar.b4 { animation: edolusEqualizerBounce 0.36s infinite ease-in-out 0.04s; }
+.edolus-spectrum-bar.b5 { animation: edolusEqualizerBounce 0.48s infinite ease-in-out 0.12s; }
+
+
 
 
 
