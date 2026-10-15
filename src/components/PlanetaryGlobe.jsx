@@ -24,7 +24,8 @@ import OptionWheel from './reactbits/OptionWheel';
 import ShinyText from './reactbits/ShinyText';
 import SpotlightCard from './reactbits/SpotlightCard';
 import Magnet from './reactbits/Magnet';
-import GoogleMapsInspector, { GLOBAL_PRESETS, classifyEarthLocation } from './GoogleMapsInspector';
+import GoogleMapsInspector from './GoogleMapsInspector';
+import { GLOBAL_PRESETS, classifyEarthLocation } from '../utils/geoTelemetry';
 
 // Real-world electricity grid regional emission factors (gCO2/kWh)
 const REGIONS = [
