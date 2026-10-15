@@ -8,6 +8,7 @@ import AIPlaybook from './components/AIPlaybook';
 import ResearchDossier from './components/ResearchDossier';
 import JudgeDemoTour from './components/JudgeDemoTour';
 import ClickSpark from './components/reactbits/ClickSpark';
+import PageTransition from './components/PageTransition';
 
 export default function App() {
   const [viewEngine, setViewEngine] = useState('globe'); // 'globe' | 'campus'
@@ -68,10 +69,44 @@ export default function App() {
     };
   }, []);
 
-  const handleZoomCampus = () => {
-    playSound(680, 'triangle', 0.12);
-    setViewEngine('campus');
+  const handleModeTransition = (newMode) => {
+    if (newMode === activeMode) return;
+    const soundMap = {
+      overview: 520,
+      vision: 840,
+      simulator: 600,
+      playbook: 760,
+      research: 920
+    };
+    playSound(soundMap[newMode] || 520, 'sine', 0.08);
+
+    if (typeof document !== 'undefined' && document.startViewTransition) {
+      document.startViewTransition(() => {
+        setActiveMode(newMode);
+      });
+    } else {
+      setActiveMode(newMode);
+    }
   };
+
+  const handleEngineTransition = (newEngine) => {
+    if (newEngine === viewEngine) return;
+    playSound(newEngine === 'campus' ? 680 : 520, 'triangle', 0.1);
+
+    if (typeof document !== 'undefined' && document.startViewTransition) {
+      document.startViewTransition(() => {
+        setViewEngine(newEngine);
+      });
+    } else {
+      setViewEngine(newEngine);
+    }
+  };
+
+  const handleZoomCampus = () => {
+    handleEngineTransition('campus');
+  };
+
+  const pageKey = activeMode === 'overview' ? `overview-${viewEngine}` : activeMode;
 
   return (
     <ClickSpark
@@ -93,15 +128,9 @@ export default function App() {
         {/* Top Command Bar */}
         <TopNav
           activeMode={activeMode}
-          setActiveMode={(m) => {
-            playSound(520, 'sine', 0.06);
-            setActiveMode(m);
-          }}
+          setActiveMode={handleModeTransition}
           viewEngine={viewEngine}
-          setViewEngine={(v) => {
-            playSound(600, 'triangle', 0.08);
-            setViewEngine(v);
-          }}
+          setViewEngine={handleEngineTransition}
           soundEnabled={soundEnabled}
           setSoundEnabled={setSoundEnabled}
           fps={fps}
@@ -109,38 +138,38 @@ export default function App() {
           onStartJudgeTour={() => setIsTourActive(true)}
         />
 
-        {/* Main Tactical Workspace */}
+        {/* Main Tactical Workspace with Unique Quantum Page Transition */}
         <div style={{ flex: 1, display: 'flex', position: 'relative', overflow: 'hidden' }}>
-          
-          {/* OVERVIEW MODE: Full-Screen Pure Spatial Experience */}
-          {activeMode === 'overview' && (
-            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-              {viewEngine === 'globe' ? (
-                <PlanetaryGlobe onZoomCampus={handleZoomCampus} playSound={playSound} />
-              ) : (
-                <CampusTwin simulationValues={simState} playSound={playSound} />
-              )}
-            </div>
-          )}
+          <PageTransition pageKey={pageKey}>
+            {/* OVERVIEW MODE: Full-Screen Pure Spatial Experience */}
+            {activeMode === 'overview' && (
+              <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                {viewEngine === 'globe' ? (
+                  <PlanetaryGlobe onZoomCampus={handleZoomCampus} playSound={playSound} />
+                ) : (
+                  <CampusTwin simulationValues={simState} playSound={playSound} />
+                )}
+              </div>
+            )}
 
-          {/* FULL CV VISION MODE */}
-          {activeMode === 'vision' && <VisionFeed simState={simState} playSound={playSound} />}
+            {/* FULL CV VISION MODE */}
+            {activeMode === 'vision' && <VisionFeed simState={simState} playSound={playSound} />}
 
-          {/* FULL WHAT-IF SIMULATOR MODE */}
-          {activeMode === 'simulator' && (
-            <SimulatorPanel
-              simState={simState}
-              setSimState={setSimState}
-              onOpenPlaybook={() => setActiveMode('playbook')}
-            />
-          )}
+            {/* FULL WHAT-IF SIMULATOR MODE */}
+            {activeMode === 'simulator' && (
+              <SimulatorPanel
+                simState={simState}
+                setSimState={setSimState}
+                onOpenPlaybook={() => handleModeTransition('playbook')}
+              />
+            )}
 
-          {/* FULL GENAI PLAYBOOK MODE */}
-          {activeMode === 'playbook' && <AIPlaybook simState={simState} playSound={playSound} />}
+            {/* FULL GENAI PLAYBOOK MODE */}
+            {activeMode === 'playbook' && <AIPlaybook simState={simState} playSound={playSound} />}
 
-          {/* FULL RESEARCH & METHODOLOGY MODE */}
-          {activeMode === 'research' && <ResearchDossier simState={simState} playSound={playSound} />}
-
+            {/* FULL RESEARCH & METHODOLOGY MODE */}
+            {activeMode === 'research' && <ResearchDossier simState={simState} playSound={playSound} />}
+          </PageTransition>
         </div>
 
         {/* Automated Code Clash SRE Judge Demo Tour */}
@@ -148,8 +177,8 @@ export default function App() {
           isActive={isTourActive}
           onClose={() => setIsTourActive(false)}
           onStepChange={({ mode, engine }) => {
-            if (mode) setActiveMode(mode);
-            if (engine) setViewEngine(engine);
+            if (mode) handleModeTransition(mode);
+            if (engine) handleEngineTransition(engine);
           }}
           onSimStateChange={setSimState}
           playSound={playSound}
