@@ -1,5 +1,10 @@
 # OMNICARBON // DSU SPATIAL CLIMATE TWIN & SRE ORCHESTRATOR
 
+[![Live Web Application](https://img.shields.io/badge/LIVE_APP-dhrgupta096.github.io%2Fcode--clash-d4ff00?style=for-the-badge&logo=google-chrome&logoColor=black)](https://dhrgupta096.github.io/code-clash/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-Active_Deploy-38bdf8?style=for-the-badge&logo=github&logoColor=white)](https://dhrgupta096.github.io/code-clash/)
+
+🚀 **Live Interactive Application**: **[https://dhrgupta096.github.io/code-clash/](https://dhrgupta096.github.io/code-clash/)**
+
 [![Vite](https://img.shields.io/badge/Vite-8.3.4-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-19.0-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev/)
 [![Three.js](https://img.shields.io/badge/Three.js-WebGL_3D-black?style=flat&logo=three.js&logoColor=white)](https://threejs.org/)
