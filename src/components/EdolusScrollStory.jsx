@@ -127,8 +127,65 @@ export default function EdolusScrollStory({
       }
     };
 
+    // Mobile Touch Swipe Gesture Support
+    let touchStartY = 0;
+    const handleTouchStart = (e) => {
+      if (e.touches && e.touches.length > 0) {
+        touchStartY = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      if (!e.changedTouches || e.changedTouches.length === 0) return;
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffY = touchStartY - touchEndY;
+
+      const now = Date.now();
+      if (now - lastScrollTime.current < 750) return;
+
+      if (Math.abs(diffY) > 45) {
+        lastScrollTime.current = now;
+        if (diffY > 0) {
+          // Swipe Up -> Step forward
+          handleStep(1);
+        } else {
+          // Swipe Down -> Step backward
+          handleStep(-1);
+        }
+      }
+    };
+
+    // Presentation Keyboard Shortcuts (1-5 Direct Jump, ArrowDown / ArrowUp)
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+        e.preventDefault();
+        handleStep(1);
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        handleStep(-1);
+      } else if (['1', '2', '3', '4', '5'].includes(e.key)) {
+        const num = parseInt(e.key, 10) - 1;
+        const target = EDOLUS_CHAPTERS[num];
+        if (target) {
+          if (playSound) playSound(520 + num * 80, 'sine', 0.08);
+          onNavigateChapter(target.mode, target.engine);
+        }
+      }
+    };
+
     window.addEventListener('wheel', handleWheel, { passive: true });
-    return () => window.removeEventListener('wheel', handleWheel);
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [currentIndex]);
 
   return (
