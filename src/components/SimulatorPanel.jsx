@@ -3,6 +3,7 @@ import { Sliders, GitFork, ArrowDownRight, DollarSign, Leaf, Zap, BarChart3, Che
 import ShinyText from './reactbits/ShinyText';
 import SpotlightCard from './reactbits/SpotlightCard';
 import Magnet from './reactbits/Magnet';
+import MicrogridLoadChart from './MicrogridLoadChart';
 
 export default function SimulatorPanel({ simState, setSimState, onOpenPlaybook }) {
   const [activeBranch, setActiveBranch] = useState('alpha');
@@ -214,6 +215,9 @@ export default function SimulatorPanel({ simState, setSimState, onOpenPlaybook }
           </SpotlightCard>
         </div>
       </div>
+
+      {/* 24-Hour Campus Microgrid Load Profile & Peak-Shaving SRE Dispatch Curve */}
+      <MicrogridLoadChart simState={simState} />
 
       {/* Interactive Simulation Sliders Deck */}
       <div className="hud-corner-box">
