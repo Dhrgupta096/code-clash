@@ -10,6 +10,7 @@ import JudgeDemoTour from './components/JudgeDemoTour';
 import ClickSpark from './components/reactbits/ClickSpark';
 import PageTransition from './components/PageTransition';
 import EdolusEntryIntro from './components/EdolusEntryIntro';
+import EdolusScrollStory from './components/EdolusScrollStory';
 
 export default function App() {
   const [showIntro, setShowIntro] = useState(true);
@@ -131,6 +132,15 @@ export default function App() {
     handleEngineTransition('campus');
   };
 
+  const handleNavigateChapter = (targetMode, targetEngine) => {
+    if (targetMode && targetMode !== activeMode) {
+      handleModeTransition(targetMode);
+    }
+    if (targetEngine && targetEngine !== viewEngine) {
+      handleEngineTransition(targetEngine);
+    }
+  };
+
   const pageKey = activeMode === 'overview' ? `overview-${viewEngine}` : activeMode;
 
   return (
@@ -208,6 +218,16 @@ export default function App() {
             {/* FULL RESEARCH & METHODOLOGY MODE */}
             {activeMode === 'research' && <ResearchDossier simState={simState} playSound={playSound} />}
           </PageTransition>
+
+          {/* EDOLUS-Inspired Scroll Navigation & Animated Hero Cue */}
+          {!isTourActive && !showIntro && (
+            <EdolusScrollStory
+              activeMode={activeMode}
+              viewEngine={viewEngine}
+              onNavigateChapter={handleNavigateChapter}
+              playSound={playSound}
+            />
+          )}
         </div>
 
         {/* Automated Code Clash SRE Judge Demo Tour */}
