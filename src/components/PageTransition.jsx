@@ -164,8 +164,6 @@ export default function PageTransition({ pageKey, children, soundEnabled = true 
         ctx.strokeStyle = p.color;
         ctx.lineWidth = p.width;
         ctx.globalAlpha = Math.max(0, 1 - progress * 0.6);
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = p.color;
         ctx.stroke();
       });
 

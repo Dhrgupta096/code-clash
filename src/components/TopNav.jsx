@@ -3,21 +3,43 @@ import { Globe, Building2, Eye, Sliders, FileText, Volume2, VolumeX, BookOpen, A
 import ShinyText from './reactbits/ShinyText';
 import Magnet from './reactbits/Magnet';
 
-export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewEngine, soundEnabled, setSoundEnabled, fps, isTourActive, onStartJudgeTour, onReplayIntro }) {
+export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewEngine, soundEnabled, setSoundEnabled, fps: externalFps, isTourActive, onStartJudgeTour, onReplayIntro }) {
   const [time, setTime] = useState('');
   const [gridFreq, setGridFreq] = useState('50.02');
+  const [localFps, setLocalFps] = useState('60.0');
 
   useEffect(() => {
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let animId = 0;
+
+    const countFrames = () => {
+      frameCount++;
+      animId = requestAnimationFrame(countFrames);
+    };
+    animId = requestAnimationFrame(countFrames);
+
     const updateTime = () => {
-      const now = new Date();
-      setTime(now.toLocaleTimeString('en-US', { hour12: false }));
+      const now = performance.now();
+      const currentFps = ((frameCount * 1000) / (now - lastTime)).toFixed(1);
+      setLocalFps(currentFps > 60 ? '60.0' : currentFps);
+      frameCount = 0;
+      lastTime = now;
+
+      const dateObj = new Date();
+      setTime(dateObj.toLocaleTimeString('en-US', { hour12: false }));
       // Karnataka SLDC Nominal 50Hz dynamic micro-fluctuation
       const jitter = (50.00 + (Math.sin(Date.now() / 3000) * 0.025) + ((Math.random() - 0.5) * 0.008)).toFixed(2);
       setGridFreq(jitter);
     };
+
     const timer = setInterval(updateTime, 1000);
     updateTime();
-    return () => clearInterval(timer);
+
+    return () => {
+      clearInterval(timer);
+      cancelAnimationFrame(animId);
+    };
   }, []);
 
   return (
@@ -259,7 +281,7 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
         }}>
           <span className="pulse-dot" />
           <span style={{ color: 'var(--text-muted)' }}>{time}</span>
-          <span style={{ color: 'var(--phosphor)', fontWeight: 600 }}>{fps} FPS</span>
+          <span style={{ color: 'var(--phosphor)', fontWeight: 600 }}>{localFps || externalFps || '60.0'} FPS</span>
         </div>
       </div>
     </header>

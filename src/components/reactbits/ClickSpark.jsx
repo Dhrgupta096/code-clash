@@ -256,12 +256,14 @@ const ClickSpark = forwardRef(
 
       const onPointerDown = event => {
         if (event.pointerType !== 'mouse' || event.button !== 0) return;
+        if (event.target && event.target.tagName === 'CANVAS') return;
         lastPress = { time: performance.now(), x: event.clientX, y: event.clientY };
         spawn(event.clientX, event.clientY);
       };
 
       const onClick = event => {
         if ('pointerType' in event && event.pointerType === 'mouse') return;
+        if (event.target && event.target.tagName === 'CANVAS') return;
         const recent =
           performance.now() - lastPress.time < 700 &&
           Math.hypot(event.clientX - lastPress.x, event.clientY - lastPress.y) < 12;

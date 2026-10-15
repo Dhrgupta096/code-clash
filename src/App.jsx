@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import TopNav from './components/TopNav';
 import PlanetaryGlobe from './components/PlanetaryGlobe';
 import CampusTwin from './components/CampusTwin';
@@ -17,7 +17,6 @@ export default function App() {
   const [viewEngine, setViewEngine] = useState('globe'); // 'globe' | 'campus'
   const [activeMode, setActiveMode] = useState('overview'); // 'overview' | 'vision' | 'simulator' | 'playbook' | 'research'
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [fps, setFps] = useState('60.0');
   const [isTourActive, setIsTourActive] = useState(false);
 
   // Unified Simulation State
@@ -28,11 +27,29 @@ export default function App() {
     hvacOpt: 40 // %
   });
 
-  // Sound FX Helper using Web Audio API (zero external audio files needed)
-  const playSound = (freq = 440, type = 'sine', duration = 0.08) => {
-    if (!soundEnabled || typeof window === 'undefined') return;
+  // Reusable Single AudioContext (prevents browser audio context exhaustion & GC thrashing)
+  const audioCtxRef = useRef(null);
+  const getAudioContext = useCallback(() => {
+    if (typeof window === 'undefined') return null;
     try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+      return audioCtxRef.current;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // Optimized Sound FX Helper
+  const playSound = useCallback((freq = 440, type = 'sine', duration = 0.08) => {
+    if (!soundEnabled) return;
+    try {
+      const audioCtx = getAudioContext();
+      if (!audioCtx) return;
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = type;
@@ -43,16 +60,17 @@ export default function App() {
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + duration);
-    } catch (e) {
+    } catch {
       // AudioContext muted/unsupported
     }
-  };
+  }, [soundEnabled, getAudioContext]);
 
   // Cinematic Harmonic Swell for Edolus-style Entrance
-  const playIntroSwell = () => {
-    if (!soundEnabled || typeof window === 'undefined') return;
+  const playIntroSwell = useCallback(() => {
+    if (!soundEnabled) return;
     try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const audioCtx = getAudioContext();
+      if (!audioCtx) return;
       [110, 220, 330, 440, 550, 660].forEach((freq, idx) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -66,71 +84,57 @@ export default function App() {
         osc.start();
         osc.stop(audioCtx.currentTime + 1.8);
       });
-    } catch (e) {
+    } catch {
       // AudioContext muted/unsupported
     }
-  };
+  }, [soundEnabled, getAudioContext]);
 
-  // FPS Monitor
-  useEffect(() => {
-    let frameCount = 0;
-    let lastTime = performance.now();
-    const interval = setInterval(() => {
-      const now = performance.now();
-      const currentFps = ((frameCount * 1000) / (now - lastTime)).toFixed(1);
-      setFps(currentFps > 60 ? '60.0' : currentFps);
-      frameCount = 0;
-      lastTime = now;
-    }, 1000);
+  const handleModeTransition = useCallback((newMode) => {
+    setActiveMode(prev => {
+      if (newMode === prev) return prev;
+      const soundMap = {
+        overview: 520,
+        vision: 840,
+        simulator: 600,
+        playbook: 760,
+        research: 920
+      };
+      playSound(soundMap[newMode] || 520, 'sine', 0.08);
 
-    const countFrames = () => {
-      frameCount++;
-      requestAnimationFrame(countFrames);
-    };
-    const reqId = requestAnimationFrame(countFrames);
+      if (typeof document !== 'undefined' && document.startViewTransition) {
+        try {
+          document.startViewTransition(() => {
+            setActiveMode(newMode);
+          });
+        } catch {
+          // If a view transition was already running or aborted, fail gracefully
+        }
+      }
+      return newMode;
+    });
+  }, [playSound]);
 
-    return () => {
-      clearInterval(interval);
-      cancelAnimationFrame(reqId);
-    };
-  }, []);
+  const handleEngineTransition = useCallback((newEngine) => {
+    setViewEngine(prev => {
+      if (newEngine === prev) return prev;
+      playSound(newEngine === 'campus' ? 680 : 520, 'triangle', 0.1);
 
-  const handleModeTransition = (newMode) => {
-    if (newMode === activeMode) return;
-    const soundMap = {
-      overview: 520,
-      vision: 840,
-      simulator: 600,
-      playbook: 760,
-      research: 920
-    };
-    playSound(soundMap[newMode] || 520, 'sine', 0.08);
+      if (typeof document !== 'undefined' && document.startViewTransition) {
+        try {
+          document.startViewTransition(() => {
+            setViewEngine(newEngine);
+          });
+        } catch {
+          // Fail gracefully
+        }
+      }
+      return newEngine;
+    });
+  }, [playSound]);
 
-    if (typeof document !== 'undefined' && document.startViewTransition) {
-      document.startViewTransition(() => {
-        setActiveMode(newMode);
-      });
-    } else {
-      setActiveMode(newMode);
-    }
-  };
-
-  const handleEngineTransition = (newEngine) => {
-    if (newEngine === viewEngine) return;
-    playSound(newEngine === 'campus' ? 680 : 520, 'triangle', 0.1);
-
-    if (typeof document !== 'undefined' && document.startViewTransition) {
-      document.startViewTransition(() => {
-        setViewEngine(newEngine);
-      });
-    } else {
-      setViewEngine(newEngine);
-    }
-  };
-
-  const handleZoomCampus = () => {
+  const handleZoomCampus = useCallback(() => {
     handleEngineTransition('campus');
-  };
+  }, [handleEngineTransition]);
 
   const handleNavigateChapter = (targetMode, targetEngine) => {
     if (targetMode && targetMode !== activeMode) {
@@ -180,7 +184,6 @@ export default function App() {
           setViewEngine={handleEngineTransition}
           soundEnabled={soundEnabled}
           setSoundEnabled={setSoundEnabled}
-          fps={fps}
           isTourActive={isTourActive}
           onStartJudgeTour={() => setIsTourActive(true)}
           onReplayIntro={() => setShowIntro(true)}

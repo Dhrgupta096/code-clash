@@ -354,6 +354,9 @@ export function classifyEarthLocation(lat, lon) {
   };
 }
 
+// In-memory cache for reverse geocode lookups
+const geocodeCache = new Map();
+
 export default function GoogleMapsInspector({
   isOpen,
   onClose,
@@ -376,28 +379,37 @@ export default function GoogleMapsInspector({
   // Default classified telemetry
   const classified = classifyEarthLocation(lat, lon);
 
-  // Asynchronous reverse geocoding via OpenStreetMap Nominatim for exact city/locality
+  // Asynchronous reverse geocoding with debounce, caching, and quick abort
   useEffect(() => {
+    if (!isOpen) return;
+    const cacheKey = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+    if (geocodeCache.has(cacheKey)) {
+      setDynamicPlaceName(geocodeCache.get(cacheKey));
+      return;
+    }
+
     let isMounted = true;
     const controller = new AbortController();
 
-    async function fetchReverseGeocode() {
+    const timer = setTimeout(async () => {
       setIsGeocoding(true);
       try {
-        const res = await fetch(
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1500));
+        const fetchPromise = fetch(
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=12&addressdetails=1`,
           {
             signal: controller.signal,
-            headers: {
-              'Accept-Language': 'en'
-            }
+            headers: { 'Accept-Language': 'en' }
           }
         );
+
+        const res = await Promise.race([fetchPromise, timeoutPromise]);
         if (!res.ok) throw new Error('Geocoding offline');
         const data = await res.json();
         if (isMounted && data && data.display_name) {
           const parts = data.display_name.split(',').map(s => s.trim());
           const shortName = parts.slice(0, 3).join(', ');
+          geocodeCache.set(cacheKey, shortName);
           setDynamicPlaceName(shortName);
         }
       } catch {
@@ -405,16 +417,14 @@ export default function GoogleMapsInspector({
       } finally {
         if (isMounted) setIsGeocoding(false);
       }
-    }
-
-    setDynamicPlaceName(null);
-    fetchReverseGeocode();
+    }, 400);
 
     return () => {
       isMounted = false;
+      clearTimeout(timer);
       controller.abort();
     };
-  }, [lat, lon]);
+  }, [isOpen, lat, lon]);
 
   if (!isOpen) return null;
 
@@ -623,9 +633,9 @@ export default function GoogleMapsInspector({
             }}
           >
             <iframe
-              key={`${lat}-${lon}-${mapMode}-${zoomLevel}`}
               src={embedUrl}
               title="Google Maps Reconnaissance"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
               style={{
                 width: '100%',
                 height: '100%',

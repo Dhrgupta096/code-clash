@@ -162,6 +162,11 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
     setIsInspectorOpen(true);
   }, [playSound, updateBeacon, orientGlobeToCoords]);
 
+  const handleSelectLocationRef = useRef(handleSelectLocation);
+  useEffect(() => {
+    handleSelectLocationRef.current = handleSelectLocation;
+  }, [handleSelectLocation]);
+
   // Live dynamic fluctuation ticker
   useEffect(() => {
     const timer = setInterval(() => {
@@ -445,8 +450,9 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
         let lon = (theta * 180) / Math.PI - 180;
         while (lon < -180) lon += 360;
         while (lon > 180) lon -= 360;
-
-        handleSelectLocation(lat, lon, 'click');
+        if (handleSelectLocationRef.current) {
+          handleSelectLocationRef.current(lat, lon, 'click');
+        }
       }
     };
 
@@ -597,7 +603,7 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
       }
       renderer.dispose();
     };
-  }, [latLonToVector3, handleSelectLocation]);
+  }, []);
 
   const currentDisplayCarbon = (selectedRegion.baseCarbon + liveJitter).toFixed(1);
 
