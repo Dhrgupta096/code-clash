@@ -196,25 +196,9 @@ html, body {
   z-index: 10;
 }
 
-.hud-corner-box::before {
-  top: -1px;
-  left: -1px;
-  border-top: 1.5px solid var(--phosphor);
-  border-left: 1.5px solid var(--phosphor);
-}
-
+.hud-corner-box::before,
 .hud-corner-box::after {
-  bottom: -1px;
-  right: -1px;
-  border-bottom: 1.5px solid var(--phosphor);
-  border-right: 1.5px solid var(--phosphor);
-}
-
-.hud-corner-box.cyan::before {
-  border-color: var(--cyan);
-}
-.hud-corner-box.cyan::after {
-  border-color: var(--cyan);
+  display: none;
 }
 
 /* Technical Telemetry Badge (cominvi.com.mx & neutomni.com inspired) */
@@ -239,24 +223,18 @@ html, body {
   color: var(--phosphor);
 }
 
-/* Cinematic Atmospheric Radial Vignette (edolus.com inspired) */
+/* Cinematic Atmospheric Radial Vignette (softened for maximum elegance) */
 .spatial-vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at center, transparent 45%, rgba(6, 7, 10, 0.6) 80%, rgba(4, 5, 8, 0.95) 100%);
+  background: radial-gradient(circle at center, transparent 65%, rgba(6, 7, 10, 0.4) 90%, rgba(4, 5, 8, 0.7) 100%);
   z-index: 5;
 }
 
-/* Subtle Horizontal Scanlines */
+/* Scanlines disabled for pristine clarity */
 .hud-scanlines {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-  background-size: 100% 4px;
-  opacity: 0.18;
-  z-index: 6;
+  display: none;
 }
 
 /* Sweeping LiDAR Laser Scan Beam */

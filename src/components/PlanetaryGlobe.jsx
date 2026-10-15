@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Globe2, Zap, ArrowRight, Activity, ShieldCheck, Sun, Target, Layers } from 'lucide-react';
+import { Globe2, Zap, ArrowRight, Activity, ShieldCheck, Sun, Target, Layers, Minimize2, ChevronUp, ChevronDown } from 'lucide-react';
 import OptionWheel from './reactbits/OptionWheel';
 import ShinyText from './reactbits/ShinyText';
 import SpotlightCard from './reactbits/SpotlightCard';
@@ -82,6 +82,8 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
   const [hudMode, setHudMode] = useState('wheel'); // 'wheel' | 'tiles'
   const [liveJitter, setLiveJitter] = useState(0);
   const [simulatedTime, setSimulatedTime] = useState('');
+  const [isLeftCollapsed, setIsLeftCollapsed] = useState(true);
+  const [isRightCollapsed, setIsRightCollapsed] = useState(false);
 
   const targetRotationRef = useRef({ y: REGIONS[0].rot.y, x: REGIONS[0].rot.x });
   const selectedRegion = REGIONS[selectedRegionIndex];
@@ -410,293 +412,363 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
       </div>
 
       {/* Floating Left HUD: React Bits SpotlightCard with OptionWheel */}
-      <div className="hud-corner-box" style={{
-        position: 'absolute',
-        bottom: '24px',
-        left: '24px',
-        width: '340px',
-        maxWidth: '90vw',
-        pointerEvents: 'auto',
-        zIndex: 20
-      }}>
-        <SpotlightCard
-          spotlightColor="rgba(212, 255, 0, 0.15)"
-          spotlightSize={260}
-          style={{ padding: '16px', borderRadius: '18px' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Globe2 size={15} color="var(--cyan)" />
-              <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-pure)' }}>
-                Global Grid Nodes
-              </span>
-            </div>
-            
-            {/* View Mode Toggle: Wheel vs Tiles */}
-            <div style={{ display: 'flex', gap: '3px' }}>
-              <button
-                onClick={() => {
-                  setHudMode('wheel');
-                  if (playSound) playSound(520, 'sine', 0.05);
-                }}
-                style={{
-                  padding: '3px 8px',
-                  background: hudMode === 'wheel' ? 'rgba(212, 255, 0, 0.15)' : 'transparent',
-                  border: hudMode === 'wheel' ? '1px solid var(--border-active)' : '1px solid var(--border-subtle)',
-                  color: hudMode === 'wheel' ? 'var(--phosphor)' : 'var(--text-muted)',
-                  borderRadius: '999px',
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                Wheel
-              </button>
-              <button
-                onClick={() => {
-                  setHudMode('tiles');
-                  if (playSound) playSound(520, 'sine', 0.05);
-                }}
-                style={{
-                  padding: '3px 8px',
-                  background: hudMode === 'tiles' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
-                  border: hudMode === 'tiles' ? '1px solid var(--cyan)' : '1px solid var(--border-subtle)',
-                  color: hudMode === 'tiles' ? 'var(--cyan)' : 'var(--text-muted)',
-                  borderRadius: '999px',
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                List
-              </button>
-            </div>
-          </div>
-
-          {/* OptionWheel from React Bits */}
-          {hudMode === 'wheel' ? (
-            <div style={{
-              height: '175px',
-              position: 'relative',
-              background: 'rgba(5, 7, 10, 0.7)',
-              borderRadius: '12px',
-              border: '1px solid var(--border-subtle)',
-              overflow: 'hidden',
-              marginBottom: '10px'
-            }}>
-              {/* Subtle indicator bar */}
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '6px',
-                right: '6px',
-                transform: 'translateY(-50%)',
-                height: '30px',
-                borderRadius: '6px',
-                border: '1px solid rgba(212, 255, 0, 0.25)',
-                pointerEvents: 'none',
-                background: 'rgba(212, 255, 0, 0.05)'
-              }} />
-
-              <OptionWheel
-                items={REGIONS.map(r => r.wheelLabel)}
-                defaultSelected={selectedRegionIndex}
-                onChange={(idx) => handleSelectRegion(idx)}
-                onTick={() => {
-                  if (playSound) playSound(720, 'sine', 0.03);
-                }}
-                fontSize={0.92}
-                spacing={1.35}
-                tilt={6}
-                curve={1.05}
-                activeColor="var(--phosphor)"
-                textColor="#64748b"
-                inset={16}
-              />
-            </div>
-          ) : (
-            /* Traditional Clean List View */
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '10px', maxHeight: '175px', overflowY: 'auto' }}>
-              {REGIONS.map((r, i) => {
-                const isSelected = selectedRegionIndex === i;
-                return (
-                  <div
-                    key={i}
-                    onClick={() => handleSelectRegion(i)}
+      {/* Floating Left HUD: Global Grid Nodes Selector */}
+      {isLeftCollapsed ? (
+        <div style={{ position: 'absolute', bottom: '24px', left: '24px', zIndex: 20 }}>
+          <button
+            onClick={() => setIsLeftCollapsed(false)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 14px',
+              borderRadius: '999px',
+              background: 'rgba(8, 10, 16, 0.88)',
+              backdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              color: 'var(--text-main)',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 12px 28px rgba(0, 0, 0, 0.5)'
+            }}
+          >
+            <Globe2 size={13} color="var(--cyan)" />
+            <span>{selectedRegion.wheelLabel}</span>
+            <span style={{ color: 'var(--phosphor)', fontFamily: 'var(--font-mono)', fontSize: '10.5px' }}>
+              {currentDisplayCarbon} gCO₂/kWh
+            </span>
+            <ChevronUp size={12} color="var(--text-muted)" />
+          </button>
+        </div>
+      ) : (
+        <div style={{
+          position: 'absolute',
+          bottom: '24px',
+          left: '24px',
+          width: '320px',
+          maxWidth: '90vw',
+          pointerEvents: 'auto',
+          zIndex: 20
+        }}>
+          <SpotlightCard
+            spotlightColor="rgba(212, 255, 0, 0.15)"
+            spotlightSize={260}
+            style={{ padding: '14px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.1)' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Globe2 size={14} color="var(--cyan)" />
+                <span style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text-pure)' }}>
+                  Global Grid Nodes
+                </span>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                {/* View Mode Toggle: Wheel vs Tiles */}
+                <div style={{ display: 'flex', gap: '2px' }}>
+                  <button
+                    onClick={() => {
+                      setHudMode('wheel');
+                      if (playSound) playSound(520, 'sine', 0.05);
+                    }}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '6px 10px',
-                      borderRadius: '8px',
-                      background: isSelected ? 'rgba(212, 255, 0, 0.1)' : 'rgba(255, 255, 255, 0.02)',
-                      border: isSelected ? '1px solid var(--border-active)' : '1px solid var(--border-subtle)',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease'
+                      padding: '2px 7px',
+                      background: hudMode === 'wheel' ? 'rgba(212, 255, 0, 0.15)' : 'transparent',
+                      border: hudMode === 'wheel' ? '1px solid var(--border-active)' : '1px solid var(--border-subtle)',
+                      color: hudMode === 'wheel' ? 'var(--phosphor)' : 'var(--text-muted)',
+                      borderRadius: '999px',
+                      fontSize: '9.5px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div className={`pulse-dot ${r.status === 'dirty' ? 'thermal' : (r.status === 'optimal' ? '' : 'cyan')}`} />
-                      <span style={{ fontSize: '11px', fontWeight: 600, color: isSelected ? 'var(--text-pure)' : 'var(--text-secondary)' }}>
-                        {r.name}
+                    Wheel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setHudMode('tiles');
+                      if (playSound) playSound(520, 'sine', 0.05);
+                    }}
+                    style={{
+                      padding: '2px 7px',
+                      background: hudMode === 'tiles' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
+                      border: hudMode === 'tiles' ? '1px solid var(--cyan)' : '1px solid var(--border-subtle)',
+                      color: hudMode === 'tiles' ? 'var(--cyan)' : 'var(--text-muted)',
+                      borderRadius: '999px',
+                      fontSize: '9.5px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    List
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setIsLeftCollapsed(true)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '2px'
+                  }}
+                  title="Minimize Nodes Panel"
+                >
+                  <Minimize2 size={12} />
+                </button>
+              </div>
+            </div>
+
+            {/* OptionWheel from React Bits */}
+            {hudMode === 'wheel' ? (
+              <div style={{
+                height: '150px',
+                position: 'relative',
+                background: 'rgba(5, 7, 10, 0.7)',
+                borderRadius: '10px',
+                border: '1px solid var(--border-subtle)',
+                overflow: 'hidden',
+                marginBottom: '8px'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '6px',
+                  right: '6px',
+                  transform: 'translateY(-50%)',
+                  height: '28px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(212, 255, 0, 0.25)',
+                  pointerEvents: 'none',
+                  background: 'rgba(212, 255, 0, 0.05)'
+                }} />
+
+                <OptionWheel
+                  items={REGIONS.map(r => r.wheelLabel)}
+                  defaultSelected={selectedRegionIndex}
+                  onChange={(idx) => handleSelectRegion(idx)}
+                  onTick={() => {
+                    if (playSound) playSound(720, 'sine', 0.03);
+                  }}
+                  fontSize={0.88}
+                  spacing={1.3}
+                  tilt={5}
+                  curve={1.05}
+                  activeColor="var(--phosphor)"
+                  textColor="#64748b"
+                  inset={14}
+                />
+              </div>
+            ) : (
+              /* Traditional Clean List View */
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px', maxHeight: '150px', overflowY: 'auto' }}>
+                {REGIONS.map((r, i) => {
+                  const isSelected = selectedRegionIndex === i;
+                  return (
+                    <div
+                      key={i}
+                      onClick={() => handleSelectRegion(i)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '5px 8px',
+                        borderRadius: '6px',
+                        background: isSelected ? 'rgba(212, 255, 0, 0.1)' : 'rgba(255, 255, 255, 0.02)',
+                        border: isSelected ? '1px solid var(--border-active)' : '1px solid var(--border-subtle)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <div className={`pulse-dot ${r.status === 'dirty' ? 'thermal' : (r.status === 'optimal' ? '' : 'cyan')}`} />
+                        <span style={{ fontSize: '10.5px', fontWeight: 600, color: isSelected ? 'var(--text-pure)' : 'var(--text-secondary)' }}>
+                          {r.name.split('(')[0].trim()}
+                        </span>
+                      </div>
+                      <span className="mono-nums" style={{
+                        fontSize: '10.5px',
+                        fontWeight: 700,
+                        color: r.status === 'optimal' ? 'var(--phosphor)' : (r.status === 'dirty' ? 'var(--thermal)' : 'var(--cyan)')
+                      }}>
+                        {isSelected ? `${currentDisplayCarbon} g` : `${r.baseCarbon} g`}
                       </span>
                     </div>
-                    <span className="mono-nums" style={{
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      color: r.status === 'optimal' ? 'var(--phosphor)' : (r.status === 'dirty' ? 'var(--thermal)' : 'var(--cyan)')
-                    }}>
-                      {isSelected ? `${currentDisplayCarbon} g` : `${r.baseCarbon} g`}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
 
-          {/* Active Node Live Carbon Sheen Badge */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: 'rgba(0, 0, 0, 0.45)',
-            padding: '7px 12px',
-            borderRadius: '10px',
-            border: '1px solid var(--border-subtle)'
-          }}>
-            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-              Carbon Intensity
-            </span>
-            <ShinyText
-              text={`${currentDisplayCarbon} gCO₂/kWh`}
-              color="var(--phosphor)"
-              shineColor="#ffffff"
-              speed={2.2}
-              style={{ fontSize: '13px', fontWeight: 800, fontFamily: 'var(--font-mono)' }}
-            />
-          </div>
-        </SpotlightCard>
-      </div>
+            {/* Active Node Live Carbon Sheen Badge */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: 'rgba(0, 0, 0, 0.45)',
+              padding: '6px 10px',
+              borderRadius: '8px',
+              border: '1px solid var(--border-subtle)'
+            }}>
+              <span style={{ fontSize: '9.5px', color: 'var(--text-muted)' }}>
+                Carbon Intensity
+              </span>
+              <ShinyText
+                text={`${currentDisplayCarbon} gCO₂/kWh`}
+                color="var(--phosphor)"
+                shineColor="#ffffff"
+                speed={2.2}
+                style={{ fontSize: '12px', fontWeight: 800, fontFamily: 'var(--font-mono)' }}
+              />
+            </div>
+          </SpotlightCard>
+        </div>
+      )}
 
       {/* Floating Right HUD: Live Regional Energy Mix & Facility Target */}
-      <div className="hud-corner-box cyan" style={{
-        position: 'absolute',
-        bottom: '24px',
-        right: '24px',
-        width: '360px',
-        maxWidth: '90vw',
-        pointerEvents: 'auto',
-        zIndex: 20
-      }}>
-        <SpotlightCard
-          spotlightColor="rgba(56, 189, 248, 0.15)"
-          spotlightSize={280}
-          style={{ padding: '18px', borderRadius: '18px' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
-              <Target size={15} color="var(--phosphor)" />
-              <span className="swiss-label" style={{ color: 'var(--phosphor)' }}>
-                [TARGET GRID NODE]
-              </span>
-            </div>
-            <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
-              {simulatedTime || 'LIVE UTC'}
-            </span>
-          </div>
-
-          <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-pure)', marginBottom: '3px', letterSpacing: '-0.02em' }}>
-            {selectedRegion.name}
-          </h3>
-          <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-            {selectedRegion.note}
-          </p>
-
-          {/* IISc Bangalore Study Reference Badge (Shown for Karnataka) */}
-          {selectedRegionIndex === 0 && (
-            <div style={{
-              background: 'rgba(212, 255, 0, 0.05)',
-              border: '1px solid rgba(212, 255, 0, 0.25)',
-              borderRadius: '8px',
-              padding: '7px 10px',
-              marginBottom: '10px',
+      {isRightCollapsed ? (
+        <div style={{ position: 'absolute', bottom: '24px', right: '24px', zIndex: 20 }}>
+          <button
+            onClick={() => setIsRightCollapsed(false)}
+            style={{
               display: 'flex',
-              flexDirection: 'column',
-              gap: '2px'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span className="swiss-label" style={{ color: 'var(--phosphor)' }}>IISc Ramachandra et al. (Springer 2021)</span>
-                <span className="mono-nums" style={{ fontSize: '10px', color: 'var(--phosphor)', fontWeight: 700 }}>CR = 10.7%</span>
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 14px',
+              borderRadius: '999px',
+              background: 'rgba(8, 10, 16, 0.88)',
+              backdropFilter: 'blur(24px)',
+              border: '1px solid rgba(212, 255, 0, 0.3)',
+              color: 'var(--phosphor)',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 12px 28px rgba(0, 0, 0, 0.5)'
+            }}
+          >
+            <Target size={13} color="var(--phosphor)" />
+            <span>TARGET: {selectedRegion.name.split('(')[0].trim()}</span>
+            <ChevronUp size={12} color="var(--text-muted)" />
+          </button>
+        </div>
+      ) : (
+        <div style={{
+          position: 'absolute',
+          bottom: '24px',
+          right: '24px',
+          width: '340px',
+          maxWidth: '90vw',
+          pointerEvents: 'auto',
+          zIndex: 20
+        }}>
+          <SpotlightCard
+            spotlightColor="rgba(56, 189, 248, 0.15)"
+            spotlightSize={280}
+            style={{ padding: '16px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.1)' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Target size={14} color="var(--phosphor)" />
+                <span className="swiss-label" style={{ color: 'var(--phosphor)', fontSize: '8.5px' }}>
+                  [TARGET GRID NODE]
+                </span>
               </div>
-              <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
-                Gross 150.65 Tg CO₂e vs 16.10 Tg sink • 89.3% deficit
-              </span>
-            </div>
-          )}
-
-          {/* Clean Dynamic Generation Mix */}
-          <div style={{
-            background: 'rgba(0, 0, 0, 0.4)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: '10px',
-            padding: '10px 12px',
-            marginBottom: '14px'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-              <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-muted)' }}>
-                Generation Mix
-              </span>
-              <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>100% Real-time</span>
-            </div>
-
-            <div style={{ display: 'flex', height: '6px', borderRadius: '999px', overflow: 'hidden', marginBottom: '8px' }}>
-              {selectedRegion.mix.solar && <div style={{ width: `${selectedRegion.mix.solar}%`, background: 'var(--emerald)' }} title="Solar" />}
-              {selectedRegion.mix.wind && <div style={{ width: `${selectedRegion.mix.wind}%`, background: 'var(--cyan)' }} title="Wind" />}
-              {selectedRegion.mix.hydro && <div style={{ width: `${selectedRegion.mix.hydro}%`, background: '#38bdf8' }} title="Hydro" />}
-              {selectedRegion.mix.nuclear && <div style={{ width: `${selectedRegion.mix.nuclear}%`, background: '#a855f7' }} title="Nuclear" />}
-              {selectedRegion.mix.gas && <div style={{ width: `${selectedRegion.mix.gas}%`, background: '#f59e0b' }} title="Gas" />}
-              {selectedRegion.mix.coal && <div style={{ width: `${selectedRegion.mix.coal}%`, background: 'var(--thermal)' }} title="Coal" />}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '9.5px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+                  {simulatedTime || 'LIVE UTC'}
+                </span>
+                <button
+                  onClick={() => setIsRightCollapsed(true)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '2px'
+                  }}
+                  title="Minimize Target Panel"
+                >
+                  <Minimize2 size={12} />
+                </button>
+              </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px', fontSize: '10.5px' }}>
-              {Object.entries(selectedRegion.mix).map(([source, val]) => (
-                <div key={source} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ textTransform: 'capitalize', color: 'var(--text-secondary)' }}>{source}:</span>
-                  <span className="mono-nums" style={{ fontWeight: 700, color: 'var(--text-pure)' }}>{val}%</span>
-                </div>
-              ))}
-            </div>
-          </div>
+            <h3 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-pure)', marginBottom: '3px', letterSpacing: '-0.02em' }}>
+              {selectedRegion.name}
+            </h3>
+            <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+              {selectedRegion.note}
+            </p>
 
-          {/* Magnetic CTA Button to Dive to DSU Campus */}
-          <Magnet padding={50} magnetStrength={3} maxOffset={8} style={{ width: '100%' }}>
-            <button
-              onClick={onZoomCampus}
-              style={{
-                width: '100%',
-                padding: '11px 16px',
-                borderRadius: '999px',
-                background: 'var(--phosphor)',
-                color: '#08090d',
-                border: 'none',
-                fontSize: '12px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                boxShadow: '0 0 20px rgba(212, 255, 0, 0.35)',
-                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-                outline: 'none'
-              }}
-            >
-              <span>Dive to DSU Campus 3D Twin</span>
-              <ArrowRight size={14} />
-            </button>
-          </Magnet>
-        </SpotlightCard>
-      </div>
+            {/* Clean Dynamic Generation Mix */}
+            <div style={{
+              background: 'rgba(0, 0, 0, 0.4)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '8px',
+              padding: '8px 10px',
+              marginBottom: '10px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                <span style={{ fontSize: '9.5px', fontWeight: 600, color: 'var(--text-muted)' }}>
+                  Generation Mix
+                </span>
+                <span style={{ fontSize: '9.5px', color: 'var(--text-muted)' }}>100% Real-time</span>
+              </div>
+
+              <div style={{ display: 'flex', height: '5px', borderRadius: '999px', overflow: 'hidden', marginBottom: '6px' }}>
+                {selectedRegion.mix.solar && <div style={{ width: `${selectedRegion.mix.solar}%`, background: 'var(--emerald)' }} title="Solar" />}
+                {selectedRegion.mix.wind && <div style={{ width: `${selectedRegion.mix.wind}%`, background: 'var(--cyan)' }} title="Wind" />}
+                {selectedRegion.mix.hydro && <div style={{ width: `${selectedRegion.mix.hydro}%`, background: '#38bdf8' }} title="Hydro" />}
+                {selectedRegion.mix.nuclear && <div style={{ width: `${selectedRegion.mix.nuclear}%`, background: '#a855f7' }} title="Nuclear" />}
+                {selectedRegion.mix.gas && <div style={{ width: `${selectedRegion.mix.gas}%`, background: '#f59e0b' }} title="Gas" />}
+                {selectedRegion.mix.coal && <div style={{ width: `${selectedRegion.mix.coal}%`, background: 'var(--thermal)' }} title="Coal" />}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3px', fontSize: '10px' }}>
+                {Object.entries(selectedRegion.mix).map(([source, val]) => (
+                  <div key={source} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                    <span style={{ textTransform: 'capitalize', color: 'var(--text-secondary)' }}>{source}:</span>
+                    <span className="mono-nums" style={{ fontWeight: 700, color: 'var(--text-pure)' }}>{val}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Magnetic CTA Button to Dive to DSU Campus */}
+            <Magnet padding={40} magnetStrength={3} maxOffset={6} style={{ width: '100%' }}>
+              <button
+                onClick={onZoomCampus}
+                style={{
+                  width: '100%',
+                  padding: '9px 14px',
+                  borderRadius: '999px',
+                  background: 'var(--phosphor)',
+                  color: '#08090d',
+                  border: 'none',
+                  fontSize: '11.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: '0 0 16px rgba(212, 255, 0, 0.3)',
+                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                  outline: 'none'
+                }}
+              >
+                <span>Dive to DSU Campus 3D Twin</span>
+                <ArrowRight size={13} />
+              </button>
+            </Magnet>
+          </SpotlightCard>
+        </div>
+      )}
     </div>
   );
 }

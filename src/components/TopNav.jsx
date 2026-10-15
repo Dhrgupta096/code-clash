@@ -67,10 +67,10 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
         {/* Minimalist Divider */}
         <div style={{ height: '16px', width: '1px', background: 'rgba(255, 255, 255, 0.08)' }} />
 
-        {/* Dual Engine Switcher Pill with Magnet (drone.riotters.com inspired) */}
+        {/* Dual Engine Switcher Pill with Magnet */}
         <div style={{
           display: 'flex',
-          background: 'rgba(255, 255, 255, 0.03)',
+          background: 'rgba(255, 255, 255, 0.04)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
           borderRadius: '999px',
           padding: '2px',
@@ -80,9 +80,9 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
             <button
               onClick={() => setViewEngine('globe')}
               style={{
-                padding: '4px 11px',
+                padding: '4px 12px',
                 borderRadius: '999px',
-                background: viewEngine === 'globe' ? 'rgba(56, 189, 248, 0.12)' : 'transparent',
+                background: viewEngine === 'globe' ? 'rgba(56, 189, 248, 0.16)' : 'transparent',
                 border: viewEngine === 'globe' ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid transparent',
                 color: viewEngine === 'globe' ? 'var(--cyan)' : 'var(--text-secondary)',
                 fontSize: '11px',
@@ -97,7 +97,7 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
               }}
             >
               <Globe size={11} color={viewEngine === 'globe' ? 'var(--cyan)' : 'currentColor'} />
-              <span>[01] EARTH 3D</span>
+              <span>EARTH 3D</span>
             </button>
           </Magnet>
 
@@ -105,9 +105,9 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
             <button
               onClick={() => setViewEngine('campus')}
               style={{
-                padding: '4px 11px',
+                padding: '4px 12px',
                 borderRadius: '999px',
-                background: viewEngine === 'campus' ? 'rgba(212, 255, 0, 0.12)' : 'transparent',
+                background: viewEngine === 'campus' ? 'rgba(212, 255, 0, 0.14)' : 'transparent',
                 border: viewEngine === 'campus' ? '1px solid var(--border-active)' : '1px solid transparent',
                 color: viewEngine === 'campus' ? 'var(--phosphor)' : 'var(--text-secondary)',
                 fontSize: '11px',
@@ -122,28 +122,28 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
               }}
             >
               <Building2 size={11} color={viewEngine === 'campus' ? 'var(--phosphor)' : 'currentColor'} />
-              <span>[02] DSU TWIN</span>
+              <span>DSU TWIN</span>
             </button>
           </Magnet>
         </div>
       </div>
 
-      {/* Mode Selectors (Swiss Editorial Navigation with Kinetic Hover) */}
+      {/* Mode Selectors (Clean Swiss Navigation) */}
       <nav style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '3px',
-        background: 'rgba(255, 255, 255, 0.025)',
+        gap: '4px',
+        background: 'rgba(255, 255, 255, 0.03)',
         padding: '3px',
         borderRadius: '999px',
-        border: '1px solid rgba(255, 255, 255, 0.06)'
+        border: '1px solid rgba(255, 255, 255, 0.07)'
       }}>
         {[
-          { id: 'overview', label: 'Overview', tag: '01', icon: Activity },
-          { id: 'vision', label: 'Metropolis CV', tag: '02', icon: Eye },
-          { id: 'simulator', label: 'What-If Sandbox', tag: '03', icon: Sliders },
-          { id: 'playbook', label: 'AI Playbook', tag: '04', icon: FileText },
-          { id: 'research', label: 'KA Audit & Science', tag: '05', icon: BookOpen }
+          { id: 'overview', label: 'Overview', icon: Activity },
+          { id: 'vision', label: 'Metropolis CV', icon: Eye },
+          { id: 'simulator', label: 'What-If Sandbox', icon: Sliders },
+          { id: 'playbook', label: 'AI Playbook', icon: FileText },
+          { id: 'research', label: 'KA Science & Audit', icon: BookOpen }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeMode === tab.id;
@@ -152,10 +152,10 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
               <button
                 onClick={() => setActiveMode(tab.id)}
                 style={{
-                  padding: '5px 13px',
+                  padding: '5px 14px',
                   borderRadius: '999px',
                   background: isActive ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
-                  border: isActive ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid transparent',
+                  border: isActive ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent',
                   color: isActive ? 'var(--text-pure)' : 'var(--text-secondary)',
                   fontSize: '11.5px',
                   fontWeight: isActive ? 600 : 500,
@@ -169,71 +169,26 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
               >
                 <Icon size={12} color={isActive ? 'var(--phosphor)' : 'var(--text-secondary)'} />
                 <span>{tab.label}</span>
-                {isActive && (
-                  <span style={{
-                    fontSize: '9px',
-                    fontFamily: 'var(--font-mono)',
-                    color: 'var(--phosphor)',
-                    opacity: 0.8
-                  }}>
-                    [{tab.tag}]
-                  </span>
-                )}
               </button>
             </Magnet>
           );
         })}
       </nav>
 
-      {/* Right Telemetry: Live Grid Hz, Audio Visualizer, KA Data Badge & Heartbeat */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      {/* Right Telemetry: Judge Tour Button & Subtle System Monitor */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         
-        {/* Real-time Grid Frequency Telemetry (cominvi.com.mx inspired) */}
-        <div className="telemetry-chip" title="Karnataka KPTCL/SLDC Live Frequency (Nominal 50.00 Hz)">
-          <Zap size={11} color="var(--cyan)" />
-          <span>GRID</span>
-          <span className="mono-nums" style={{ color: 'var(--text-pure)', fontWeight: 700 }}>
-            {gridFreq} Hz
-          </span>
-        </div>
-
-        {/* Karnataka Real Data Pill Indicator */}
-        <Magnet padding={35} magnetStrength={3} maxOffset={6}>
-          <button
-            onClick={() => setActiveMode('research')}
-            style={{
-              padding: '4px 10px',
-              borderRadius: '999px',
-              background: 'rgba(212, 255, 0, 0.08)',
-              border: '1px solid rgba(212, 255, 0, 0.35)',
-              color: 'var(--phosphor)',
-              fontSize: '10.5px',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-mono)',
-              transition: 'all 0.15s ease'
-            }}
-            title="Open Karnataka 2020-2024 Empirical Dataset (CEA v20.0, KPTCL, IISc)"
-          >
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--phosphor)', boxShadow: '0 0 8px var(--phosphor)' }} />
-            <span>KA 2020–24 REAL DATA</span>
-          </button>
-        </Magnet>
-
-        {/* Run SRE Judge Demo Tour Action Button */}
+        {/* Run SRE Judge Demo Tour Action Button - Highlighted for Judges */}
         <Magnet padding={35} magnetStrength={3} maxOffset={6}>
           <button
             onClick={onStartJudgeTour}
             style={{
-              padding: '4px 12px',
+              padding: '5px 14px',
               borderRadius: '999px',
               background: isTourActive ? 'var(--phosphor)' : 'rgba(212, 255, 0, 0.15)',
               border: isTourActive ? '1.5px solid var(--phosphor)' : '1px solid var(--border-active)',
               color: isTourActive ? '#05070a' : 'var(--phosphor)',
-              fontSize: '10.5px',
+              fontSize: '11px',
               fontWeight: 800,
               display: 'flex',
               alignItems: 'center',
@@ -249,6 +204,14 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
             <span>{isTourActive ? 'TOUR ACTIVE' : 'RUN JUDGE TOUR'}</span>
           </button>
         </Magnet>
+
+        {/* Real-time Grid Frequency Telemetry */}
+        <div className="telemetry-chip" title="Karnataka KPTCL/SLDC Live Frequency (Nominal 50.00 Hz)">
+          <Zap size={10} color="var(--cyan)" />
+          <span className="mono-nums" style={{ color: 'var(--text-pure)', fontWeight: 700 }}>
+            {gridFreq} Hz
+          </span>
+        </div>
 
         {/* Audio Synthesizer with Equalizer Wave (edolus.com inspired) */}
         <Magnet padding={40} magnetStrength={3} maxOffset={6}>

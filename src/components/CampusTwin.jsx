@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { 
   Cpu, Flame, Sun, Bus, ShieldAlert, Sparkles, Layers, Eye, RotateCcw, 
-  Box, Wind, ArrowRight, Compass, Crosshair, ExternalLink, X, Maximize2, 
-  Droplets, HeartPulse, Trophy, Trees, Navigation, CheckCircle2
+  Box, Wind, ArrowRight, Compass, Crosshair, ExternalLink, X, Maximize2, Minimize2,
+  Droplets, HeartPulse, Trophy, Trees, Navigation, CheckCircle2, ChevronDown, ChevronUp
 } from 'lucide-react';
 import SpotlightCard from './reactbits/SpotlightCard';
 import Magnet from './reactbits/Magnet';
@@ -310,6 +310,8 @@ export default function CampusTwin({ simulationValues = {}, onSelectBuilding, pl
   const [lidarScan, setLidarScan] = useState(false);
   const [activePreset, setActivePreset] = useState('iso');
   const [virtualTourModal, setVirtualTourModal] = useState(null); // node id string or null
+  const [sectorDropdownOpen, setSectorDropdownOpen] = useState(false);
+  const [isDossierCollapsed, setIsDossierCollapsed] = useState(true);
 
   // Camera Target and Angle References for Smooth Tweening
   const cameraTargetRef = useRef({ x: 0, y: 0, z: 0 });
@@ -804,6 +806,7 @@ export default function CampusTwin({ simulationValues = {}, onSelectBuilding, pl
       if (intersects.length > 0) {
         const clickedBuilding = intersects[0].object.userData;
         setSelectedBuildingId(clickedBuilding.id);
+        setIsDossierCollapsed(false);
         if (onSelectBuilding) onSelectBuilding(clickedBuilding);
 
         targetCameraTargetRef.current = {
@@ -923,421 +926,410 @@ export default function CampusTwin({ simulationValues = {}, onSelectBuilding, pl
       <div className="spatial-vignette" />
       <div className="hud-scanlines" />
 
-      {/* Active LiDAR Laser Beam Sweep & Telemetry Dossier (drone.riotters.com inspired) */}
+      {/* Active LiDAR Laser Beam Sweep & Elegant Minimalist Chip */}
       {lidarScan && (
         <>
           <div className="lidar-scan-beam" />
-          <div className="hud-corner-box" style={{
+          <div style={{
             position: 'absolute',
-            top: '76px',
-            right: '24px',
-            width: '320px',
-            background: 'rgba(6, 8, 12, 0.92)',
-            backdropFilter: 'blur(24px)',
-            border: '1px solid var(--border-active)',
-            borderRadius: '12px',
-            padding: '14px',
-            boxShadow: '0 0 24px rgba(212, 255, 0, 0.2)',
+            top: '18px',
+            right: '20px',
+            background: 'rgba(6, 8, 12, 0.88)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(212, 255, 0, 0.35)',
+            borderRadius: '999px',
+            padding: '5px 12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '7px',
+            boxShadow: '0 0 16px rgba(212, 255, 0, 0.12)',
             zIndex: 25
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Crosshair size={13} color="var(--phosphor)" />
-                <span className="swiss-label" style={{ color: 'var(--phosphor)' }}>
-                  [LIDAR SURFACE TELEMETRY]
-                </span>
-              </div>
-              <span className="telemetry-chip active">8 NODES</span>
-            </div>
-            <p style={{ fontSize: '11px', color: 'var(--text-main)', lineHeight: 1.45, marginBottom: '10px' }}>
-              Autonomous dual-wavelength LiDAR inspection sweeping DSU Harohalli building envelope (140+ acres). Real-time deformation detection at ±1.8 cm tolerance.
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px', fontSize: '10.5px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px 8px', borderRadius: '6px' }}>
-                <span className="swiss-label" style={{ display: 'block', fontSize: '8.5px' }}>CONFIDENCE</span>
-                <span className="mono-nums" style={{ color: 'var(--phosphor)', fontWeight: 700 }}>98.4%</span>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px 8px', borderRadius: '6px' }}>
-                <span className="swiss-label" style={{ display: 'block', fontSize: '8.5px' }}>DEFORMATION</span>
-                <span className="mono-nums" style={{ color: 'var(--cyan)', fontWeight: 700 }}>±1.4 cm</span>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px 8px', borderRadius: '6px' }}>
-                <span className="swiss-label" style={{ display: 'block', fontSize: '8.5px' }}>ELEVATION RANGE</span>
-                <span className="mono-nums" style={{ color: 'var(--text-pure)', fontWeight: 700 }}>666 - 704 M</span>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: '6px 8px', borderRadius: '6px' }}>
-                <span className="swiss-label" style={{ display: 'block', fontSize: '8.5px' }}>POINT DENSITY</span>
-                <span className="mono-nums" style={{ color: 'var(--emerald)', fontWeight: 700 }}>320 pts/m²</span>
-              </div>
-            </div>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--phosphor)', boxShadow: '0 0 8px var(--phosphor)' }} />
+            <span style={{ fontSize: '10px', color: 'var(--phosphor)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+              LIDAR SCAN: ±1.4cm (98.4%)
+            </span>
           </div>
         </>
       )}
 
-      {/* Top Facility Hotspots Bar (Direct Jump & Camera Focus) */}
+      {/* Unified Minimalist Command Capsule (Single Sleek Bar) */}
       <div style={{
         position: 'absolute',
-        top: '68px',
+        top: '16px',
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        gap: '5px',
-        maxWidth: '92vw',
-        zIndex: 20
-      }}>
-        {BUILDINGS_BASE.map(b => {
-          const isSelected = selectedBuildingId === b.id;
-          return (
-            <button
-              key={b.id}
-              onClick={() => {
-                setSelectedBuildingId(b.id);
-                targetCameraTargetRef.current = { x: b.pos[0], y: b.size[1] / 2, z: b.pos[2] };
-                targetCameraAngleRef.current.radius = 85;
-                if (playSound) playSound(640, 'triangle', 0.08);
-              }}
-              style={{
-                padding: '4px 10px',
-                borderRadius: '999px',
-                background: isSelected ? 'rgba(212, 255, 0, 0.15)' : 'rgba(8, 10, 15, 0.75)',
-                border: isSelected ? '1px solid var(--border-active)' : '1px solid rgba(255,255,255,0.08)',
-                backdropFilter: 'blur(16px)',
-                color: isSelected ? 'var(--phosphor)' : 'var(--text-secondary)',
-                fontSize: '10.5px',
-                fontWeight: 600,
-                fontFamily: 'var(--font-mono)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: isSelected ? 'var(--phosphor)' : 'var(--text-muted)' }} />
-              <span>{b.shortName || b.name}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Top Centered Floating Controls Island with React Bits Magnet */}
-      <div style={{
-        position: 'absolute',
-        top: '20px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
         alignItems: 'center',
         gap: '8px',
-        maxWidth: '96vw',
-        pointerEvents: 'auto',
-        zIndex: 20
+        background: 'rgba(8, 10, 16, 0.88)',
+        backdropFilter: 'blur(28px)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '999px',
+        padding: '3px 8px',
+        boxShadow: '0 16px 36px rgba(0, 0, 0, 0.5)',
+        zIndex: 30
       }}>
-        {/* Preset Camera Views Pill Dock */}
-        <div style={{
-          display: 'flex',
-          gap: '3px',
-          background: 'rgba(10, 12, 18, 0.8)',
-          padding: '3px',
-          borderRadius: '999px',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          backdropFilter: 'blur(24px)',
-          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.5)'
-        }}>
-          {PRESETS.map((p) => {
-            const isActive = activePreset === p.id;
-            return (
-              <Magnet key={p.id} padding={40} magnetStrength={3} maxOffset={6}>
+        {/* Sector Navigator Popover Trigger */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setSectorDropdownOpen(!sectorDropdownOpen)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'rgba(212, 255, 0, 0.1)',
+              border: '1px solid rgba(212, 255, 0, 0.3)',
+              borderRadius: '999px',
+              padding: '4px 11px',
+              color: 'var(--phosphor)',
+              fontSize: '11px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontFamily: 'var(--font-mono)',
+              outline: 'none'
+            }}
+          >
+            <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--phosphor)' }} />
+            <span>{selectedBuilding.shortName || selectedBuilding.name}</span>
+            <ChevronDown size={11} />
+          </button>
+
+          {/* Sector Selector Floating Popover */}
+          {sectorDropdownOpen && (
+            <div style={{
+              position: 'absolute',
+              top: 'calc(100% + 8px)',
+              left: '0',
+              width: '260px',
+              background: 'rgba(9, 12, 18, 0.96)',
+              backdropFilter: 'blur(30px)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '14px',
+              padding: '6px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '3px',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.7)',
+              zIndex: 50
+            }}>
+              <div style={{ padding: '4px 8px', fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                SELECT HAROHALLI CAMPUS SECTOR
+              </div>
+              {BUILDINGS_BASE.map(b => (
                 <button
-                  onClick={() => handleSelectPreset(p)}
+                  key={b.id}
+                  onClick={() => {
+                    setSelectedBuildingId(b.id);
+                    setIsDossierCollapsed(false);
+                    targetCameraTargetRef.current = { x: b.pos[0], y: b.size[1] / 2, z: b.pos[2] };
+                    targetCameraAngleRef.current.radius = 85;
+                    setSectorDropdownOpen(false);
+                    if (playSound) playSound(640, 'triangle', 0.08);
+                  }}
                   style={{
-                    padding: '5px 10px',
-                    background: isActive ? 'rgba(212, 255, 0, 0.12)' : 'transparent',
-                    border: isActive ? '1px solid var(--border-active)' : '1px solid transparent',
-                    color: isActive ? 'var(--phosphor)' : 'var(--text-secondary)',
-                    borderRadius: '999px',
-                    fontSize: '10.5px',
-                    fontWeight: isActive ? 600 : 500,
-                    cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
-                    transition: 'all 0.15s ease',
-                    outline: 'none',
-                    fontFamily: 'var(--font-mono)'
+                    justifyContent: 'space-between',
+                    padding: '7px 10px',
+                    borderRadius: '8px',
+                    background: selectedBuildingId === b.id ? 'rgba(212, 255, 0, 0.12)' : 'transparent',
+                    border: selectedBuildingId === b.id ? '1px solid rgba(212, 255, 0, 0.3)' : '1px solid transparent',
+                    color: selectedBuildingId === b.id ? 'var(--phosphor)' : 'var(--text-main)',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    textAlign: 'left',
+                    cursor: 'pointer'
                   }}
                 >
-                  <Compass size={11} color={isActive ? 'var(--phosphor)' : 'currentColor'} />
-                  <span>{p.label}</span>
+                  <span>{b.shortName || b.name}</span>
+                  <span style={{ fontSize: '9px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{b.virtualTourNode}</span>
                 </button>
-              </Magnet>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Subtle Divider */}
+        <div style={{ height: '14px', width: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
+
+        {/* 4 Clean Essential Camera Presets */}
+        <div style={{ display: 'flex', gap: '2px' }}>
+          {[
+            { id: 'iso', label: 'ISO', target: { x: 0, y: 0, z: 0 }, angle: { theta: Math.PI / 4, phi: Math.PI / 4, radius: 135 }, buildingId: 'soe-block' },
+            { id: 'soe', label: 'ENG & AI', target: { x: 32, y: 12, z: -22 }, angle: { theta: -Math.PI / 3.2, phi: Math.PI / 3.4, radius: 72 }, buildingId: 'soe-block' },
+            { id: 'med', label: 'MED WING', target: { x: -34, y: 11, z: 22 }, angle: { theta: -Math.PI / 1.8, phi: Math.PI / 3.5, radius: 85 }, buildingId: 'cds-hospital' },
+            { id: 'ortho', label: 'TOP', target: { x: 0, y: 0, z: 0 }, angle: { theta: 0.001, phi: 0.05, radius: 155 }, buildingId: 'soe-block' }
+          ].map((p) => {
+            const isActive = activePreset === p.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => handleSelectPreset(p)}
+                style={{
+                  padding: '4px 9px',
+                  borderRadius: '999px',
+                  background: isActive ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
+                  border: isActive ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid transparent',
+                  color: isActive ? 'var(--text-pure)' : 'var(--text-secondary)',
+                  fontSize: '10.5px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-mono)',
+                  outline: 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {p.label}
+              </button>
             );
           })}
         </div>
 
-        {/* Spatial Layer Toggles */}
-        <div style={{
-          display: 'flex',
-          gap: '4px',
-          background: 'rgba(10, 12, 18, 0.8)',
-          padding: '3px',
-          borderRadius: '999px',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          backdropFilter: 'blur(24px)',
-          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.5)'
-        }}>
-          {/* LiDAR Laser Beam Inspection Toggle */}
-          <Magnet padding={40} magnetStrength={3} maxOffset={6}>
-            <button
-              onClick={() => {
-                setLidarScan(!lidarScan);
-                if (playSound) playSound(740, 'sawtooth', 0.08);
-              }}
-              style={{
-                padding: '5px 11px',
-                background: lidarScan ? 'rgba(212, 255, 0, 0.15)' : 'transparent',
-                border: lidarScan ? '1px solid var(--phosphor)' : '1px solid transparent',
-                borderRadius: '999px',
-                color: lidarScan ? 'var(--phosphor)' : 'var(--text-secondary)',
-                fontSize: '10.5px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.2s',
-                outline: 'none',
-                fontFamily: 'var(--font-mono)'
-              }}
-            >
-              <Crosshair size={12} color={lidarScan ? 'var(--phosphor)' : 'currentColor'} />
-              <span>LiDAR: {lidarScan ? 'ACTIVE' : 'OFF'}</span>
-            </button>
-          </Magnet>
+        {/* Subtle Divider */}
+        <div style={{ height: '14px', width: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
 
-          {/* X-Ray Internal Sensor Toggle */}
-          <Magnet padding={40} magnetStrength={3} maxOffset={6}>
-            <button
-              onClick={() => {
-                setXRayMode(!xRayMode);
-                if (playSound) playSound(660, 'square', 0.08);
-              }}
-              style={{
-                padding: '5px 11px',
-                background: xRayMode ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
-                border: xRayMode ? '1px solid var(--cyan)' : '1px solid transparent',
-                borderRadius: '999px',
-                color: xRayMode ? 'var(--cyan)' : 'var(--text-secondary)',
-                fontSize: '10.5px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.2s',
-                outline: 'none',
-                fontFamily: 'var(--font-mono)'
-              }}
-            >
-              <Box size={12} />
-              <span>X-Ray: {xRayMode ? 'ON' : 'OFF'}</span>
-            </button>
-          </Magnet>
+        {/* Minimalist Layer Toggles */}
+        <div style={{ display: 'flex', gap: '3px' }}>
+          <button
+            onClick={() => { setXRayMode(!xRayMode); if (playSound) playSound(660, 'square', 0.08); }}
+            style={{
+              padding: '4px 8px',
+              borderRadius: '999px',
+              background: xRayMode ? 'rgba(56, 189, 248, 0.16)' : 'transparent',
+              border: xRayMode ? '1px solid var(--cyan)' : '1px solid transparent',
+              color: xRayMode ? 'var(--cyan)' : 'var(--text-secondary)',
+              fontSize: '10px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              cursor: 'pointer',
+              outline: 'none',
+              fontFamily: 'var(--font-mono)'
+            }}
+            title="Toggle X-Ray Internal Structures"
+          >
+            <Box size={11} />
+            <span>X-Ray</span>
+          </button>
 
-          {/* Emissions Heatmap Toggle */}
-          <Magnet padding={40} magnetStrength={3} maxOffset={6}>
-            <button
-              onClick={() => {
-                setShowHeatmap(!showHeatmap);
-                if (playSound) playSound(560, 'sine', 0.06);
-              }}
-              style={{
-                padding: '5px 11px',
-                background: showHeatmap ? 'rgba(255, 85, 0, 0.15)' : 'transparent',
-                border: showHeatmap ? '1px solid var(--thermal)' : '1px solid transparent',
-                borderRadius: '999px',
-                color: showHeatmap ? 'var(--thermal)' : 'var(--text-secondary)',
-                fontSize: '10.5px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                transition: 'all 0.2s',
-                outline: 'none',
-                fontFamily: 'var(--font-mono)'
-              }}
-            >
-              <Flame size={12} />
-              <span>Heatmap: {showHeatmap ? 'ON' : 'OFF'}</span>
-            </button>
-          </Magnet>
+          <button
+            onClick={() => { setShowHeatmap(!showHeatmap); if (playSound) playSound(560, 'sine', 0.06); }}
+            style={{
+              padding: '4px 8px',
+              borderRadius: '999px',
+              background: showHeatmap ? 'rgba(255, 85, 0, 0.16)' : 'transparent',
+              border: showHeatmap ? '1px solid var(--thermal)' : '1px solid transparent',
+              color: showHeatmap ? 'var(--thermal)' : 'var(--text-secondary)',
+              fontSize: '10px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              cursor: 'pointer',
+              outline: 'none',
+              fontFamily: 'var(--font-mono)'
+            }}
+            title="Toggle Emissions Heatmap"
+          >
+            <Flame size={11} />
+            <span>Heatmap</span>
+          </button>
+
+          <button
+            onClick={() => { setLidarScan(!lidarScan); if (playSound) playSound(740, 'sawtooth', 0.08); }}
+            style={{
+              padding: '4px 8px',
+              borderRadius: '999px',
+              background: lidarScan ? 'rgba(212, 255, 0, 0.16)' : 'transparent',
+              border: lidarScan ? '1px solid var(--phosphor)' : '1px solid transparent',
+              color: lidarScan ? 'var(--phosphor)' : 'var(--text-secondary)',
+              fontSize: '10px',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              cursor: 'pointer',
+              outline: 'none',
+              fontFamily: 'var(--font-mono)'
+            }}
+            title="Toggle LiDAR Laser Sweep"
+          >
+            <Crosshair size={11} />
+            <span>LiDAR</span>
+          </button>
         </div>
       </div>
 
-      {/* Bottom Left: Selected Building Telemetry SpotlightCard with Virtual Tour Integration */}
-      <div className="hud-corner-box" style={{
-        position: 'absolute',
-        bottom: '20px',
-        left: '20px',
-        width: '420px',
-        maxWidth: '92vw',
-        maxHeight: 'calc(100vh - 160px)',
-        overflowY: 'auto',
-        pointerEvents: 'auto',
-        zIndex: 20
-      }}>
-        <SpotlightCard
-          spotlightColor={selectedBuilding.accent}
-          spotlightSize={320}
-          style={{ padding: '16px', borderRadius: '16px' }}
-        >
-          {/* Header & Category */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Cpu size={14} color={selectedBuilding.accent} />
-              <span className="swiss-label" style={{ color: selectedBuilding.accent }}>
-                [{selectedBuilding.category}]
-              </span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <span className="telemetry-chip active" style={{ fontSize: '9px' }}>
-                {selectedBuilding.virtualTourNode}
-              </span>
-              <span style={{ fontSize: '9.5px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                3D TWIN
-              </span>
-            </div>
-          </div>
-
-          {/* Title & Coordinates */}
-          <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-pure)', marginBottom: '4px', letterSpacing: '-0.02em' }}>
-            {selectedBuilding.name}
-          </h3>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '10px', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', marginBottom: '8px' }}>
-            <span>LAT: {selectedBuilding.gps.lat}</span>
-            <span>•</span>
-            <span>LON: {selectedBuilding.gps.lon}</span>
-            <span>•</span>
-            <span>ALT: {selectedBuilding.gps.alt}</span>
-          </div>
-
-          <p style={{ fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: 1.45, marginBottom: '10px' }}>
-            {selectedBuilding.desc}
-          </p>
-
-          {/* Dynamic Reactive Metric Grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '6px',
-            background: 'rgba(0, 0, 0, 0.45)',
-            padding: '8px 10px',
-            borderRadius: '10px',
-            border: '1px solid var(--border-subtle)',
-            marginBottom: '10px'
-          }}>
-            {Object.entries(dynamicMetrics).map(([key, val], idx) => (
-              <div key={idx} style={{ gridColumn: key === 'carbonStatus' ? 'span 2' : 'span 1' }}>
-                <span className="swiss-label" style={{ display: 'block', marginBottom: '2px', fontSize: '8.5px' }}>
-                  {key.replace(/([A-Z])/g, ' $1')}
-                </span>
-                <span className="mono-nums" style={{
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  color: key === 'footprint' ? 'var(--thermal)' : (key === 'carbonStatus' ? 'var(--phosphor)' : 'var(--text-pure)')
-                }}>
-                  {val}
+      {/* Bottom Left: Collapsible Telemetry Dossier */}
+      {isDossierCollapsed ? (
+        <div style={{ position: 'absolute', bottom: '20px', left: '20px', zIndex: 20 }}>
+          <button
+            onClick={() => setIsDossierCollapsed(false)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '7px 14px',
+              borderRadius: '999px',
+              background: 'rgba(8, 10, 16, 0.88)',
+              backdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              color: 'var(--text-main)',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 12px 28px rgba(0, 0, 0, 0.5)'
+            }}
+          >
+            <Cpu size={12} color={selectedBuilding.accent} />
+            <span style={{ color: 'var(--text-pure)' }}>{selectedBuilding.shortName || selectedBuilding.name}</span>
+            <span style={{ color: 'var(--phosphor)', fontFamily: 'var(--font-mono)', fontSize: '10.5px' }}>
+              {dynamicMetrics.footprint?.split(' ')[0] || '0.24'} kg CO₂/hr
+            </span>
+            <ChevronUp size={12} color="var(--text-muted)" />
+          </button>
+        </div>
+      ) : (
+        <div style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '20px',
+          width: '360px',
+          maxWidth: '90vw',
+          maxHeight: 'calc(100vh - 140px)',
+          overflowY: 'auto',
+          pointerEvents: 'auto',
+          zIndex: 20
+        }}>
+          <SpotlightCard
+            spotlightColor={selectedBuilding.accent}
+            spotlightSize={300}
+            style={{ padding: '14px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.1)' }}
+          >
+            {/* Header & Category */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Cpu size={13} color={selectedBuilding.accent} />
+                <span className="swiss-label" style={{ color: selectedBuilding.accent, fontSize: '8.5px' }}>
+                  [{selectedBuilding.category.split('&')[0].trim()}]
                 </span>
               </div>
-            ))}
-          </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <span className="telemetry-chip active" style={{ fontSize: '9px', padding: '1px 6px' }}>
+                  {selectedBuilding.virtualTourNode}
+                </span>
+                <button
+                  onClick={() => setIsDossierCollapsed(true)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '2px'
+                  }}
+                  title="Minimize Telemetry Dossier"
+                >
+                  <Minimize2 size={12} />
+                </button>
+              </div>
+            </div>
 
-          {/* Official Virtual Tour Sub-Hotspots / Department Rooms */}
-          {selectedBuilding.departments && selectedBuilding.departments.length > 0 && (
-            <div style={{ marginBottom: '10px' }}>
-              <span className="swiss-label" style={{ display: 'block', fontSize: '9px', marginBottom: '4px', color: 'var(--text-muted)' }}>
-                KEY FACILITY WINGS & LABS (PANO.XML REGISTRY)
-              </span>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                {selectedBuilding.departments.map((dep, dIdx) => (
-                  <span
-                    key={dIdx}
-                    style={{
-                      fontSize: '10px',
-                      padding: '3px 7px',
-                      background: 'rgba(255, 255, 255, 0.04)',
-                      border: '1px solid rgba(255, 255, 255, 0.06)',
-                      borderRadius: '4px',
-                      color: 'var(--text-main)',
-                      fontFamily: 'var(--font-mono)'
-                    }}
-                  >
-                    {dep}
+            {/* Title & Coordinates */}
+            <h3 style={{ fontSize: '14px', fontWeight: 800, color: 'var(--text-pure)', marginBottom: '3px', letterSpacing: '-0.02em' }}>
+              {selectedBuilding.name}
+            </h3>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '9.5px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', marginBottom: '8px' }}>
+              <span>LAT: {selectedBuilding.gps.lat}</span>
+              <span>•</span>
+              <span>ALT: {selectedBuilding.gps.alt}</span>
+            </div>
+
+            {/* Dynamic Reactive Metric Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '6px',
+              background: 'rgba(0, 0, 0, 0.45)',
+              padding: '8px 10px',
+              borderRadius: '8px',
+              border: '1px solid var(--border-subtle)',
+              marginBottom: '8px'
+            }}>
+              {Object.entries(dynamicMetrics).slice(0, 4).map(([key, val], idx) => (
+                <div key={idx} style={{ gridColumn: key === 'carbonStatus' ? 'span 2' : 'span 1' }}>
+                  <span className="swiss-label" style={{ display: 'block', marginBottom: '2px', fontSize: '8px' }}>
+                    {key.replace(/([A-Z])/g, ' $1')}
                   </span>
-                ))}
-              </div>
+                  <span className="mono-nums" style={{
+                    fontSize: '10.5px',
+                    fontWeight: 600,
+                    color: key === 'footprint' ? 'var(--thermal)' : (key === 'carbonStatus' ? 'var(--phosphor)' : 'var(--text-pure)')
+                  }}>
+                    {val}
+                  </span>
+                </div>
+              ))}
             </div>
-          )}
 
-          {/* Direct 360° Virtual Tour Launch Button */}
-          <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
-            <button
-              onClick={() => {
-                setVirtualTourModal(selectedBuilding.virtualTourNode);
-                if (playSound) playSound(800, 'sine', 0.08);
-              }}
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.18), rgba(212, 255, 0, 0.14))',
-                border: '1px solid var(--border-active)',
-                borderRadius: '8px',
-                color: 'var(--phosphor)',
-                fontSize: '11px',
-                fontWeight: 700,
-                fontFamily: 'var(--font-mono)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-                transition: 'all 0.2s',
-                boxShadow: '0 0 12px rgba(212, 255, 0, 0.15)'
-              }}
-            >
-              <Eye size={13} color="var(--phosphor)" />
-              <span>LAUNCH 360° DSU PANORAMA</span>
-            </button>
+            {/* Direct 360° Virtual Tour Launch Button */}
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button
+                onClick={() => {
+                  setVirtualTourModal(selectedBuilding.virtualTourNode);
+                  if (playSound) playSound(800, 'sine', 0.08);
+                }}
+                style={{
+                  flex: 1,
+                  padding: '7px 10px',
+                  background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.16), rgba(212, 255, 0, 0.12))',
+                  border: '1px solid var(--border-active)',
+                  borderRadius: '7px',
+                  color: 'var(--phosphor)',
+                  fontSize: '10.5px',
+                  fontWeight: 700,
+                  fontFamily: 'var(--font-mono)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '5px',
+                  transition: 'all 0.15s ease',
+                  boxShadow: '0 0 10px rgba(212, 255, 0, 0.12)'
+                }}
+              >
+                <Eye size={12} color="var(--phosphor)" />
+                <span>LAUNCH 360° DSU PANORAMA</span>
+              </button>
 
-            <a
-              href={`https://www.dsu.edu.in/virtual-tour/#${selectedBuilding.virtualTourNode}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                padding: '8px 10px',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '8px',
-                color: 'var(--text-secondary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                textDecoration: 'none'
-              }}
-              title="Open Official Tour in New Tab"
-            >
-              <ExternalLink size={13} />
-            </a>
-          </div>
-        </SpotlightCard>
-      </div>
+              <a
+                href={`https://www.dsu.edu.in/virtual-tour/#${selectedBuilding.virtualTourNode}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  padding: '7px 9px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '7px',
+                  color: 'var(--text-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  textDecoration: 'none'
+                }}
+                title="Open Official Tour in New Tab"
+              >
+                <ExternalLink size={12} />
+              </a>
+            </div>
+          </SpotlightCard>
+        </div>
+      )}
 
       {/* High-Tech In-App 360° DSU Virtual Tour Modal Viewer */}
       {virtualTourModal && (

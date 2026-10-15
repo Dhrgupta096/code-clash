@@ -812,51 +812,54 @@ export default function VisionFeed({ simState = { fleetEv: 30, aiSolarShift: tru
               {/* Box Top Label */}
               <div style={{
                 display: 'flex',
-                justifyContent: 'space-between',
                 alignItems: 'center',
+                gap: '4px',
                 fontFamily: 'var(--font-mono)',
-                fontSize: '9.5px',
+                fontSize: '9px',
                 fontWeight: 800,
                 color: '#05070a',
                 background: boxColor,
-                padding: '2px 5px',
-                borderRadius: '2px',
+                padding: '2px 6px',
+                borderRadius: '3px',
                 width: 'fit-content',
                 maxWidth: '100%',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                boxShadow: `0 2px 8px ${boxColor}44`
               }}>
-                {det.id} • {det.label}
+                <span>{det.id}</span>
+                <span style={{ opacity: 0.75 }}>•</span>
+                <span>{det.label.split('(')[0].trim()}</span>
               </div>
 
-              {/* Box Bottom Telemetry */}
-              <div style={{
-                background: 'rgba(5, 7, 10, 0.88)',
-                border: `1px solid ${boxColor}`,
-                padding: '4px 6px',
-                borderRadius: '3px',
-                fontFamily: 'var(--font-mono)',
-                fontSize: '9px',
-                color: 'var(--text-pure)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '2px'
-              }}>
-                <div>STATUS: <strong style={{ color: boxColor }}>{det.status}</strong></div>
-                {det.burn && (
-                  <div>EMISSION RATE: <strong>{det.burn} ({det.co2})</strong></div>
-                )}
-                {det.idleTime && (
-                  <div>IDLE TIME: <strong style={{ color: isAlert ? 'var(--thermal)' : 'inherit' }}>{det.idleTime}</strong></div>
-                )}
-                {det.temp && (
-                  <div>CORE TEMP: <strong>{det.temp}</strong> • DRAW: <strong style={{ color: 'var(--phosphor)' }}>{det.power}</strong></div>
-                )}
-                {det.irradiance && (
-                  <div>IRRADIANCE: <strong>{det.irradiance}</strong> • YIELD: <strong style={{ color: 'var(--emerald)' }}>{det.yield}</strong></div>
-                )}
-              </div>
+              {/* Box Bottom Telemetry: Clean 1-Line Indicator */}
+              {(isAlert || isSelected) && (
+                <div style={{
+                  background: 'rgba(5, 7, 10, 0.92)',
+                  border: `1px solid ${boxColor}`,
+                  padding: '2px 6px',
+                  borderRadius: '3px',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '8.5px',
+                  color: isAlert ? 'var(--thermal)' : 'var(--text-pure)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  width: 'fit-content',
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  backdropFilter: 'blur(8px)'
+                }}>
+                  {isAlert ? (
+                    <span>🚨 {det.status}: {det.co2 || det.idleTime}</span>
+                  ) : (
+                    <span>{det.status} {det.power ? `• ${det.power}` : ''}</span>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
