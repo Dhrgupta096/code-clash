@@ -3,7 +3,7 @@ import { Globe, Building2, Eye, Sliders, FileText, Volume2, VolumeX, BookOpen, A
 import ShinyText from './reactbits/ShinyText';
 import Magnet from './reactbits/Magnet';
 
-export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewEngine, soundEnabled, setSoundEnabled, fps, isTourActive, onStartJudgeTour }) {
+export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewEngine, soundEnabled, setSoundEnabled, fps, isTourActive, onStartJudgeTour, onReplayIntro }) {
   const [time, setTime] = useState('');
   const [gridFreq, setGridFreq] = useState('50.02');
 
@@ -36,7 +36,11 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
     }}>
       {/* Brand & Identity with Swiss Architectural Layout */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div
+          onClick={onReplayIntro}
+          title="Click to replay EDOLUS-inspired atmospheric bootloader sequence"
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: onReplayIntro ? 'pointer' : 'default', userSelect: 'none' }}
+        >
           <div style={{
             width: '26px',
             height: '26px',
@@ -49,7 +53,8 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
             fontWeight: 900,
             fontSize: '13px',
             boxShadow: '0 0 16px rgba(212, 255, 0, 0.35)',
-            letterSpacing: '-0.02em'
+            letterSpacing: '-0.02em',
+            transition: 'transform 0.15s ease'
           }}>
             Ω
           </div>

@@ -9,8 +9,10 @@ import ResearchDossier from './components/ResearchDossier';
 import JudgeDemoTour from './components/JudgeDemoTour';
 import ClickSpark from './components/reactbits/ClickSpark';
 import PageTransition from './components/PageTransition';
+import EdolusEntryIntro from './components/EdolusEntryIntro';
 
 export default function App() {
+  const [showIntro, setShowIntro] = useState(true);
   const [viewEngine, setViewEngine] = useState('globe'); // 'globe' | 'campus'
   const [activeMode, setActiveMode] = useState('overview'); // 'overview' | 'vision' | 'simulator' | 'playbook' | 'research'
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -40,6 +42,29 @@ export default function App() {
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {
+      // AudioContext muted/unsupported
+    }
+  };
+
+  // Cinematic Harmonic Swell for Edolus-style Entrance
+  const playIntroSwell = () => {
+    if (!soundEnabled || typeof window === 'undefined') return;
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      [110, 220, 330, 440, 550, 660].forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.04 / (idx + 1), audioCtx.currentTime + 0.35);
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 1.8);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1.8);
+      });
     } catch (e) {
       // AudioContext muted/unsupported
     }
@@ -125,6 +150,18 @@ export default function App() {
         background: 'var(--bg-canvas)',
         overflow: 'hidden'
       }}>
+        {/* EDOLUS-Inspired Atmospheric Entry Sequence Overlay */}
+        {showIntro && (
+          <EdolusEntryIntro
+            onEnter={() => {
+              playIntroSwell();
+              setShowIntro(false);
+            }}
+            soundEnabled={soundEnabled}
+            onToggleSound={() => setSoundEnabled(!soundEnabled)}
+          />
+        )}
+
         {/* Top Command Bar */}
         <TopNav
           activeMode={activeMode}
@@ -136,6 +173,7 @@ export default function App() {
           fps={fps}
           isTourActive={isTourActive}
           onStartJudgeTour={() => setIsTourActive(true)}
+          onReplayIntro={() => setShowIntro(true)}
         />
 
         {/* Main Tactical Workspace with Unique Quantum Page Transition */}
