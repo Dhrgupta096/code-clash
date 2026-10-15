@@ -6,6 +6,7 @@ import VisionFeed from './components/VisionFeed';
 import SimulatorPanel from './components/SimulatorPanel';
 import AIPlaybook from './components/AIPlaybook';
 import ResearchDossier from './components/ResearchDossier';
+import JudgeDemoTour from './components/JudgeDemoTour';
 import ClickSpark from './components/reactbits/ClickSpark';
 
 export default function App() {
@@ -13,6 +14,7 @@ export default function App() {
   const [activeMode, setActiveMode] = useState('overview'); // 'overview' | 'vision' | 'simulator' | 'playbook' | 'research'
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [fps, setFps] = useState('60.0');
+  const [isTourActive, setIsTourActive] = useState(false);
 
   // Unified Simulation State
   const [simState, setSimState] = useState({
@@ -103,6 +105,8 @@ export default function App() {
           soundEnabled={soundEnabled}
           setSoundEnabled={setSoundEnabled}
           fps={fps}
+          isTourActive={isTourActive}
+          onStartJudgeTour={() => setIsTourActive(true)}
         />
 
         {/* Main Tactical Workspace */}
@@ -138,6 +142,18 @@ export default function App() {
           {activeMode === 'research' && <ResearchDossier simState={simState} playSound={playSound} />}
 
         </div>
+
+        {/* Automated Code Clash SRE Judge Demo Tour */}
+        <JudgeDemoTour
+          isActive={isTourActive}
+          onClose={() => setIsTourActive(false)}
+          onStepChange={({ mode, engine }) => {
+            if (mode) setActiveMode(mode);
+            if (engine) setViewEngine(engine);
+          }}
+          onSimStateChange={setSimState}
+          playSound={playSound}
+        />
       </div>
     </ClickSpark>
   );

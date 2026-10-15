@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Building2, Eye, Sliders, FileText, Volume2, VolumeX, BookOpen, Activity, ShieldCheck, Zap } from 'lucide-react';
+import { Globe, Building2, Eye, Sliders, FileText, Volume2, VolumeX, BookOpen, Activity, ShieldCheck, Zap, Play } from 'lucide-react';
 import ShinyText from './reactbits/ShinyText';
 import Magnet from './reactbits/Magnet';
 
-export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewEngine, soundEnabled, setSoundEnabled, fps }) {
+export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewEngine, soundEnabled, setSoundEnabled, fps, isTourActive, onStartJudgeTour }) {
   const [time, setTime] = useState('');
   const [gridFreq, setGridFreq] = useState('50.02');
 
@@ -220,6 +220,33 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
           >
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--phosphor)', boxShadow: '0 0 8px var(--phosphor)' }} />
             <span>KA 2020–24 REAL DATA</span>
+          </button>
+        </Magnet>
+
+        {/* Run SRE Judge Demo Tour Action Button */}
+        <Magnet padding={35} magnetStrength={3} maxOffset={6}>
+          <button
+            onClick={onStartJudgeTour}
+            style={{
+              padding: '4px 12px',
+              borderRadius: '999px',
+              background: isTourActive ? 'var(--phosphor)' : 'rgba(212, 255, 0, 0.15)',
+              border: isTourActive ? '1.5px solid var(--phosphor)' : '1px solid var(--border-active)',
+              color: isTourActive ? '#05070a' : 'var(--phosphor)',
+              fontSize: '10.5px',
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-mono)',
+              boxShadow: isTourActive ? '0 0 16px rgba(212, 255, 0, 0.6)' : '0 0 12px rgba(212, 255, 0, 0.25)',
+              transition: 'all 0.15s ease'
+            }}
+            title="Start Automated 1-Click Code Clash SRE Judge Demo Tour"
+          >
+            <Play size={10} fill="currentColor" />
+            <span>{isTourActive ? 'TOUR ACTIVE' : 'RUN JUDGE TOUR'}</span>
           </button>
         </Magnet>
 
