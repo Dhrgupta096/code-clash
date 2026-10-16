@@ -10,9 +10,29 @@ import JudgeDemoTour from './components/JudgeDemoTour';
 import PageTransition from './components/PageTransition';
 import AICopilotDrawer from './components/AICopilotDrawer';
 import EdolusPresentationDeck from './components/EdolusPresentationDeck';
+import EdolusEntryIntro from './components/EdolusEntryIntro';
 import ClickSpark from './components/reactbits/ClickSpark';
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('omnicarbon_user');
+        return stored ? JSON.parse(stored) : { name: 'Code Clash Judge', role: 'JUDGE' };
+      } catch {
+        return { name: 'Code Clash Judge', role: 'JUDGE' };
+      }
+    }
+    return { name: 'Code Clash Judge', role: 'JUDGE' };
+  });
+
+  const [showLogin, setShowLogin] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !sessionStorage.getItem('omnicarbon_entered');
+    }
+    return true;
+  });
+
   const [viewEngine, setViewEngine] = useState('globe'); // 'globe' | 'campus'
   const [activeMode, setActiveMode] = useState('overview'); // 'overview' | 'vision' | 'simulator' | 'playbook' | 'research'
   const [soundEnabled, setSoundEnabled] = useState(false); // Clean & silent by default
@@ -135,6 +155,8 @@ export default function App() {
         onStartJudgeTour={() => setIsTourActive(true)}
         onOpenCopilot={() => setIsCopilotOpen(true)}
         onOpenPresentation={() => setIsDeckOpen(true)}
+        currentUser={currentUser}
+        onOpenLogin={() => setShowLogin(true)}
       />
 
       {/* Main Workspace with Fast, Clean 140ms Crossfade */}
@@ -203,6 +225,24 @@ export default function App() {
         onToggleSound={() => setSoundEnabled(!soundEnabled)}
         playSound={playSound}
       />
+
+      {/* SRE Authentication & Telemetry Entry Portal */}
+      {showLogin && (
+        <EdolusEntryIntro
+          onEnter={(user) => {
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('omnicarbon_entered', 'true');
+            }
+            if (user) setCurrentUser(user);
+            setShowLogin(false);
+          }}
+          soundEnabled={soundEnabled}
+          onToggleSound={() => setSoundEnabled(!soundEnabled)}
+          currentUser={currentUser}
+          setCurrentUser={setCurrentUser}
+          playSound={playSound}
+        />
+      )}
     </div>
     </ClickSpark>
   );

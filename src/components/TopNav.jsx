@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Building2, Eye, Sliders, BookOpen, Volume2, VolumeX, Zap, Play, Sparkles, GitBranch, Presentation } from 'lucide-react';
+import { Globe, Building2, Eye, Sliders, BookOpen, Volume2, VolumeX, Zap, Play, Sparkles, GitBranch, Presentation, User } from 'lucide-react';
 import { ApiClient } from '../services/apiClient';
 
 export default function TopNav({
@@ -12,7 +12,9 @@ export default function TopNav({
   isTourActive,
   onStartJudgeTour,
   onOpenCopilot,
-  onOpenPresentation
+  onOpenPresentation,
+  currentUser,
+  onOpenLogin
 }) {
   const [time, setTime] = useState('');
   const [gridFreq, setGridFreq] = useState('50.02');
@@ -252,6 +254,31 @@ export default function TopNav({
           }} />
           <span>{backendOnline ? 'API :3001' : 'STATIC'}</span>
         </div>
+
+        {/* SRE Operator / Login Profile Pill */}
+        <button
+          onClick={onOpenLogin}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '6px',
+            padding: '4px 8px',
+            fontSize: '11px',
+            fontWeight: 600,
+            color: '#f8fafc',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)'; e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'; }}
+          title="Click to Switch SRE Operator / Open Login Interface"
+        >
+          <User size={11} color="#34d399" />
+          <span>{currentUser?.name ? currentUser.name.split(' ')[0] : 'Sign In'}</span>
+        </button>
 
         {/* Edolus-Style Cinematic PPT Deck Button */}
         <button
