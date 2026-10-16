@@ -69,7 +69,30 @@ html, body {
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  background: radial-gradient(circle at 50% -10%, #121722 0%, #0a0d14 65%, #07090e 100%);
+  background: 
+    radial-gradient(ellipse at 50% 0%, rgba(56, 189, 248, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 85% 90%, rgba(16, 185, 129, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 50% -10%, #111622 0%, #090c12 60%, #05070a 100%);
+}
+
+::selection {
+  background: rgba(16, 185, 129, 0.35);
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* Tabular figures for telemetry & numbers */
@@ -132,10 +155,10 @@ html, body {
 }
 
 .clean-btn.active {
-  background: rgba(212, 255, 0, 0.12);
+  background: rgba(16, 185, 129, 0.14);
   border-color: var(--border-active);
-  color: var(--phosphor);
-  box-shadow: 0 0 16px rgba(212, 255, 0, 0.15);
+  color: #34d399;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.2);
 }
 
 /* Pulsing Status Indicators */
