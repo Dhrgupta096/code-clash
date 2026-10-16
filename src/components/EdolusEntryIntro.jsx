@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ShieldCheck, ArrowRight, Zap, Globe, Cpu, User, Key, CheckCircle2, 
-  Volume2, VolumeX, Sparkles, Building2, Award, Lock, ExternalLink 
-} from 'lucide-react';
+import { Volume2, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import ShinyText from './reactbits/ShinyText';
 import Magnet from './reactbits/Magnet';
 
@@ -12,32 +9,27 @@ const BOOT_LOGS = [
   'Reconstructing DSU Harohalli 140-acre spatial mesh from pano.xml...',
   'Initializing NVIDIA Jetson AGX Orin DeepStream 7.0 inference pipeline...',
   'Calibrating finite element microgrid diurnal solver & peak-shaving matrix...',
-  'Security & role access verified // Certified ready for SRE evaluation.'
+  'All telemetry subsystems online // Certified ready for SRE evaluation.'
 ];
 
 export default function EdolusEntryIntro({ 
   onEnter, 
-  soundEnabled = false, 
-  onToggleSound, 
-  currentUser, 
+  soundEnabled = true, 
+  onToggleSound,
+  currentUser,
   setCurrentUser,
-  playSound 
+  playSound
 }) {
   const [progress, setProgress] = useState(0);
   const [logIndex, setLogIndex] = useState(0);
   const [isEntering, setIsEntering] = useState(false);
   const [ready, setReady] = useState(false);
-  const [authMode, setAuthMode] = useState('judge'); // 'judge' | 'credentials' | 'google'
+  const [selectedRole, setSelectedRole] = useState('judge');
 
-  // Form state
-  const [email, setEmail] = useState('judge@codeclash.sre');
-  const [operatorId, setOperatorId] = useState('DSU-SRE-2026');
-  const [selectedRole, setSelectedRole] = useState('Code Clash Judge');
-
-  // Progressive system bootloader simulation
+  // Progressive system bootloader simulation (2.0s smooth cinematic sequence)
   useEffect(() => {
     const startTime = Date.now();
-    const duration = 1600; // 1.6s smooth load
+    const duration = 2000;
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -54,77 +46,57 @@ export default function EdolusEntryIntro({
         clearInterval(interval);
         setReady(true);
       }
-    }, 35);
+    }, 40);
 
     return () => clearInterval(interval);
   }, []);
 
-  const handleCompleteLogin = (userData) => {
-    const userToSave = userData || {
-      name: selectedRole,
-      email: email.trim() || 'judge@codeclash.sre',
-      operatorId: operatorId.trim() || 'DSU-SRE-2026',
-      role: selectedRole.toUpperCase(),
-      loginTime: new Date().toLocaleTimeString('en-US', { hour12: false })
+  const handleStart = () => {
+    const roleMap = {
+      judge: { name: 'Code Clash Judge', role: 'JUDGE', operatorId: 'SRE-EVAL-01' },
+      director: { name: 'DSU Facility Director', role: 'ADMIN', operatorId: 'DIR-HAROHALLI' },
+      auditor: { name: 'IISc Climate Auditor', role: 'AUDITOR', operatorId: 'IISC-CES-04' }
     };
+    const userToSave = roleMap[selectedRole] || roleMap.judge;
 
     if (typeof window !== 'undefined') {
       localStorage.setItem('omnicarbon_user', JSON.stringify(userToSave));
     }
     if (setCurrentUser) setCurrentUser(userToSave);
 
-    if (playSound) playSound(640, 'sine', 0.1);
+    if (playSound) playSound(640, 'sine', 0.12);
     setIsEntering(true);
     setTimeout(() => {
       onEnter(userToSave);
-    }, 450);
-  };
-
-  const handleJudgeQuickLogin = (roleName) => {
-    const roleMap = {
-      'Code Clash Judge': { name: 'Code Clash Evaluator', email: 'judge@codeclash.sre', operatorId: 'JUDGE-01', role: 'JUDGE' },
-      'DSU Facility Director': { name: 'DSU Chief SRE Director', email: 'director.sre@dsu.edu.in', operatorId: 'DIR-HAROHALLI', role: 'ADMIN' },
-      'IISc Climate Scientist': { name: 'IISc Senior Fellow', email: 'cistup.audit@iisc.ac.in', operatorId: 'IISC-CES-04', role: 'AUDITOR' }
-    };
-    const chosen = roleMap[roleName] || roleMap['Code Clash Judge'];
-    handleCompleteLogin(chosen);
-  };
-
-  const handleGoogleLogin = () => {
-    // Simulated Google OAuth handshake matching DSU Hub
-    handleCompleteLogin({
-      name: 'Google Verified Student / SRE',
-      email: 'student.dsu@dsu.edu.in',
-      operatorId: 'GSUITE-AUTH-99',
-      role: 'STUDENT_ENGINEER'
-    });
+    }, 600);
   };
 
   return (
     <div style={{
       position: 'fixed',
       inset: 0,
-      background: '#07090e',
+      background: '#040508',
       zIndex: 99999,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '20px',
-      overflow: 'auto',
+      padding: '24px',
+      overflow: 'hidden',
       opacity: isEntering ? 0 : 1,
-      transform: isEntering ? 'scale(1.03)' : 'scale(1)',
-      filter: isEntering ? 'blur(10px)' : 'none',
-      transition: 'opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.45s cubic-bezier(0.16, 1, 0.3, 1)'
+      transform: isEntering ? 'scale(1.05)' : 'scale(1)',
+      filter: isEntering ? 'blur(12px)' : 'none',
+      transition: 'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
     }}>
-      {/* Background Subtle Radial Glow & Subtle Grid */}
+      {/* Background Animated Subtle Starfield & Spatial Glow */}
       <div style={{
         position: 'absolute',
         inset: 0,
-        background: 'radial-gradient(circle at 50% 40%, rgba(16, 185, 129, 0.08) 0%, rgba(56, 189, 248, 0.03) 45%, transparent 75%)',
+        background: 'radial-gradient(circle at 50% 45%, rgba(56, 189, 248, 0.08) 0%, rgba(16, 185, 129, 0.06) 40%, transparent 75%)',
         pointerEvents: 'none'
       }} />
 
+      {/* Cyber Grid Lines (edolus.com inspired) */}
       <div style={{
         position: 'absolute',
         inset: 0,
@@ -133,7 +105,7 @@ export default function EdolusEntryIntro({
         pointerEvents: 'none'
       }} />
 
-      {/* Main Container */}
+      {/* Central Content Box */}
       <div style={{
         position: 'relative',
         zIndex: 10,
@@ -141,473 +113,250 @@ export default function EdolusEntryIntro({
         flexDirection: 'column',
         alignItems: 'center',
         textAlign: 'center',
-        maxWidth: '540px',
-        width: '100%',
-        margin: 'auto'
+        maxWidth: '680px',
+        width: '100%'
       }}>
-        {/* Monogram Symbol */}
-        <div style={{ position: 'relative', marginBottom: '16px' }}>
+        {/* Monogram Symbol with Breathing Energy Aura */}
+        <div style={{ position: 'relative', marginBottom: '24px' }}>
           <div style={{
             position: 'absolute',
-            inset: '-14px',
+            inset: '-18px',
             borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(16, 185, 129, 0.35) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(16, 185, 129, 0.45) 0%, transparent 70%)',
             animation: 'smoothPulse 3s infinite ease-in-out',
             pointerEvents: 'none'
           }} />
           <div style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '14px',
-            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            width: '68px',
+            height: '68px',
+            borderRadius: '18px',
+            background: 'linear-gradient(135deg, #34d399 0%, #059669 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#ffffff',
-            fontSize: '28px',
+            color: '#040508',
+            fontSize: '34px',
             fontWeight: 900,
             fontFamily: 'var(--font-mono)',
-            boxShadow: '0 0 28px rgba(16, 185, 129, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.5)'
+            boxShadow: '0 0 34px rgba(16, 185, 129, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.6)'
           }}>
             Ω
           </div>
         </div>
 
-        {/* Title */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+        {/* Title & Organization Subtitle with ShinyText */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
           <ShinyText
             text="OMNICARBON"
             color="#ffffff"
             shineColor="#34d399"
             speed={2.5}
             shineWidth={60}
-            style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '-0.03em', fontFamily: 'var(--font-ui)' }}
+            style={{ fontSize: '32px', fontWeight: 900, letterSpacing: '-0.03em', fontFamily: 'var(--font-ui)' }}
           />
           <span style={{
-            fontSize: '10px',
+            fontSize: '11px',
             fontWeight: 800,
             fontFamily: 'var(--font-mono)',
             color: '#34d399',
-            background: 'rgba(16, 185, 129, 0.14)',
-            border: '1px solid rgba(16, 185, 129, 0.4)',
-            padding: '2px 7px',
+            background: 'rgba(16, 185, 129, 0.12)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            padding: '3px 8px',
             borderRadius: '999px',
             letterSpacing: '0.06em'
           }}>
-            SRE PORTAL
+            DSU // SRE
           </span>
         </div>
 
         <p style={{
-          fontSize: '12.5px',
-          color: '#94a3b8',
+          fontSize: '13.5px',
+          color: 'var(--text-secondary)',
           lineHeight: 1.5,
-          marginBottom: '20px',
-          maxWidth: '480px'
+          marginBottom: '22px',
+          maxWidth: '540px'
         }}>
-          Autonomous Climate Spatial Digital Twin & Microgrid Reliability Orchestrator for <strong style={{ color: '#f8fafc' }}>Dayananda Sagar University</strong> Harohalli Campus.
+          Autonomous Climate Spatial Digital Twin & Microgrid Reliability Orchestrator for <strong style={{ color: 'var(--text-pure)' }}>Dayananda Sagar University</strong> Harohalli Campus.
         </p>
 
-        {/* Telemetry Bootloader Progress Indicator */}
+        {/* Minimal High-Tech Operator Role Switcher */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          marginBottom: '22px',
+          background: 'rgba(255, 255, 255, 0.03)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '999px',
+          padding: '4px'
+        }}>
+          {[
+            { id: 'judge', label: 'Code Clash Judge', badge: 'JUDGE' },
+            { id: 'director', label: 'DSU Director', badge: 'ADMIN' },
+            { id: 'auditor', label: 'IISc Climate Auditor', badge: 'AUDIT' }
+          ].map(item => {
+            const isSelected = selectedRole === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setSelectedRole(item.id);
+                  if (playSound) playSound(520, 'sine', 0.04);
+                }}
+                style={{
+                  padding: '5px 13px',
+                  borderRadius: '999px',
+                  background: isSelected ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
+                  border: isSelected ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid transparent',
+                  color: isSelected ? '#34d399' : '#8b949e',
+                  fontSize: '11px',
+                  fontWeight: isSelected ? 700 : 500,
+                  fontFamily: 'var(--font-mono)',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
+              >
+                {isSelected && <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 6px #34d399' }} />}
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Interactive Progress Bar Deck */}
         <div style={{
           width: '100%',
-          background: 'rgba(15, 20, 30, 0.8)',
+          maxWidth: '480px',
+          background: 'rgba(255, 255, 255, 0.03)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '12px',
-          padding: '12px 18px',
+          borderRadius: '16px',
+          padding: '18px 22px',
           backdropFilter: 'blur(20px)',
-          marginBottom: '18px',
-          boxShadow: '0 16px 40px rgba(0, 0, 0, 0.5)'
+          marginBottom: '26px',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', fontWeight: 700, color: ready ? '#34d399' : '#38bdf8' }}>
-              {ready ? '[TELEMETRY SUBSYSTEMS VERIFIED]' : '[INITIALIZING SRE SENSORS...]'}
+          {/* Progress Percent & Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <span className="swiss-label" style={{ color: ready ? '#34d399' : '#38bdf8' }}>
+              {ready ? '[SYSTEM CALIBRATION COMPLETE]' : '[SYSTEM BOOTLOADER SEQUENCE]'}
             </span>
-            <span style={{ fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 800, color: '#f8fafc' }}>
+            <span className="mono-nums" style={{ fontSize: '13px', fontWeight: 800, color: 'var(--text-pure)' }}>
               {progress}%
             </span>
           </div>
 
+          {/* Glowing Animated Progress Bar */}
           <div style={{
             width: '100%',
             height: '4px',
             background: 'rgba(255, 255, 255, 0.08)',
             borderRadius: '999px',
             overflow: 'hidden',
-            marginBottom: '8px'
+            marginBottom: '12px',
+            position: 'relative'
           }}>
             <div style={{
               width: `${progress}%`,
               height: '100%',
-              background: 'linear-gradient(90deg, #38bdf8 0%, #10b981 100%)',
+              background: 'linear-gradient(90deg, #38bdf8 0%, #34d399 100%)',
               borderRadius: '999px',
+              boxShadow: '0 0 16px rgba(52, 211, 153, 0.6)',
               transition: 'width 0.1s linear'
             }} />
           </div>
 
+          {/* Dynamic Console Ticker */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            fontSize: '10.5px',
-            color: '#8b949e',
+            gap: '8px',
+            fontSize: '11px',
+            color: 'var(--text-muted)',
             fontFamily: 'var(--font-mono)',
-            textAlign: 'left'
+            textAlign: 'left',
+            minHeight: '22px'
           }}>
-            <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: ready ? '#34d399' : '#38bdf8', flexShrink: 0 }} />
-            <span style={{ color: ready ? '#34d399' : '#94a3b8' }}>
+            <span className="pulse-dot cyan" style={{ flexShrink: 0 }} />
+            <span style={{ color: ready ? '#34d399' : 'var(--text-secondary)' }}>
               {BOOT_LOGS[logIndex]}
             </span>
           </div>
         </div>
 
-        {/* Authentication & Role Selection Card */}
-        <div style={{
-          width: '100%',
-          background: '#0e121a',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: '14px',
-          padding: '18px 20px',
-          backdropFilter: 'blur(20px)',
-          boxShadow: '0 24px 50px rgba(0, 0, 0, 0.6)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '14px'
-        }}>
-          {/* Auth Tab Switcher */}
-          <div style={{
-            display: 'flex',
-            background: '#141a24',
-            borderRadius: '8px',
-            padding: '3px',
-            border: '1px solid rgba(255, 255, 255, 0.06)'
-          }}>
+        {/* Action Button: Edolus-Style High-Impact Entry */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Magnet padding={50} magnetStrength={3} maxOffset={8}>
             <button
-              onClick={() => setAuthMode('judge')}
+              onClick={handleStart}
               style={{
-                flex: 1,
-                padding: '6px 10px',
-                borderRadius: '6px',
-                background: authMode === 'judge' ? '#1f2937' : 'transparent',
-                color: authMode === 'judge' ? '#f8fafc' : '#8b949e',
+                padding: '12px 34px',
+                borderRadius: '999px',
+                background: ready ? '#10b981' : 'rgba(16, 185, 129, 0.25)',
+                color: ready ? '#040508' : '#34d399',
                 border: 'none',
-                fontSize: '11px',
-                fontWeight: 600,
+                fontSize: '13px',
+                fontWeight: 800,
+                fontFamily: 'var(--font-mono)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                gap: '5px',
-                transition: 'all 0.15s ease'
+                gap: '8px',
+                boxShadow: ready ? '0 0 28px rgba(16, 185, 129, 0.45)' : 'none',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                outline: 'none',
+                letterSpacing: '0.04em'
               }}
             >
-              <Award size={12} color={authMode === 'judge' ? '#34d399' : 'currentColor'} />
-              <span>Judge Quick Pass</span>
+              <span>{ready ? 'ENTER OMNICARBON' : 'INITIALIZING...'}</span>
+              <ArrowRight size={15} />
             </button>
+          </Magnet>
 
-            <button
-              onClick={() => setAuthMode('credentials')}
-              style={{
-                flex: 1,
-                padding: '6px 10px',
-                borderRadius: '6px',
-                background: authMode === 'credentials' ? '#1f2937' : 'transparent',
-                color: authMode === 'credentials' ? '#f8fafc' : '#8b949e',
-                border: 'none',
-                fontSize: '11px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '5px',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <Key size={12} color={authMode === 'credentials' ? '#38bdf8' : 'currentColor'} />
-              <span>SRE Credentials</span>
-            </button>
-
-            <button
-              onClick={() => setAuthMode('google')}
-              style={{
-                flex: 1,
-                padding: '6px 10px',
-                borderRadius: '6px',
-                background: authMode === 'google' ? '#1f2937' : 'transparent',
-                color: authMode === 'google' ? '#f8fafc' : '#8b949e',
-                border: 'none',
-                fontSize: '11px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '5px',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <span>Google SSO</span>
-            </button>
-          </div>
-
-          {/* TAB 1: Fast Judge & Evaluator Quick Login */}
-          {authMode === 'judge' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <button
-                onClick={() => handleJudgeQuickLogin('Code Clash Judge')}
-                style={{
-                  padding: '11px 18px',
-                  borderRadius: '8px',
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  color: '#ffffff',
-                  border: 'none',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
-                  transition: 'transform 0.12s ease'
-                }}
-                onMouseDown={e => e.currentTarget.style.transform = 'scale(0.98)'}
-                onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Award size={16} />
-                  <span>Enter as Code Clash Evaluator</span>
-                </div>
-                <ArrowRight size={14} />
-              </button>
-
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button
-                  onClick={() => handleJudgeQuickLogin('DSU Facility Director')}
-                  style={{
-                    flex: 1,
-                    padding: '8px 10px',
-                    borderRadius: '6px',
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    color: '#94a3b8',
-                    fontSize: '10.5px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.color = '#f8fafc'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)'; }}
-                >
-                  DSU Campus Director
-                </button>
-
-                <button
-                  onClick={() => handleJudgeQuickLogin('IISc Climate Scientist')}
-                  style={{
-                    flex: 1,
-                    padding: '8px 10px',
-                    borderRadius: '6px',
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    color: '#94a3b8',
-                    fontSize: '10.5px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.color = '#f8fafc'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)'; }}
-                >
-                  IISc Climate Auditor
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: Custom SRE Operator Form */}
-          {authMode === 'credentials' && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleCompleteLogin();
-              }}
-              style={{ display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' }}
-            >
-              <div>
-                <label style={{ fontSize: '10px', color: '#8b949e', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Operator Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="engineer@dsu.edu.in"
-                  style={{
-                    width: '100%',
-                    background: '#07090e',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    borderRadius: '6px',
-                    padding: '8px 10px',
-                    fontSize: '11px',
-                    color: '#f8fafc',
-                    outline: 'none',
-                    marginTop: '3px',
-                    fontFamily: 'var(--font-mono)'
-                  }}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '10px', color: '#8b949e', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  SRE Authorization Token
-                </label>
-                <input
-                  type="password"
-                  value={operatorId}
-                  onChange={e => setOperatorId(e.target.value)}
-                  placeholder="DSU-SRE-2026"
-                  style={{
-                    width: '100%',
-                    background: '#07090e',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    borderRadius: '6px',
-                    padding: '8px 10px',
-                    fontSize: '11px',
-                    color: '#f8fafc',
-                    outline: 'none',
-                    marginTop: '3px',
-                    fontFamily: 'var(--font-mono)'
-                  }}
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                style={{
-                  padding: '9px 14px',
-                  borderRadius: '6px',
-                  background: '#2563eb',
-                  color: '#ffffff',
-                  border: 'none',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  marginTop: '4px'
-                }}
-              >
-                <ShieldCheck size={13} />
-                <span>Verify Credentials & Enter Twin</span>
-              </button>
-            </form>
-          )}
-
-          {/* TAB 3: Google SSO */}
-          {authMode === 'google' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <p style={{ fontSize: '11.5px', color: '#94a3b8', lineHeight: 1.4 }}>
-                Sign in with your Dayananda Sagar University Google Workspace account to sync carbon logs with DSU Hub.
-              </p>
-
-              <button
-                onClick={handleGoogleLogin}
-                style={{
-                  padding: '10px 16px',
-                  borderRadius: '8px',
-                  background: '#ffffff',
-                  color: '#1f2937',
-                  border: 'none',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.3)'
-                }}
-              >
-                <svg viewBox="0 0 24 24" style={{ width: '16px', height: '16px' }}>
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                <span>Continue with Google (@dsu.edu.in)</span>
-              </button>
-            </div>
-          )}
-
-          {/* Bottom Bar: Sound Toggle & Direct Guest Skip */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingTop: '8px',
-            borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-            fontSize: '11px',
-            color: '#8b949e'
-          }}>
-            <button
-              onClick={onToggleSound}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: soundEnabled ? '#34d399' : '#8b949e',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                cursor: 'pointer',
-                fontSize: '10.5px'
-              }}
-            >
-              {soundEnabled ? <Volume2 size={12} /> : <VolumeX size={12} />}
-              <span>{soundEnabled ? 'Audio Synth Active' : 'Audio Muted'}</span>
-            </button>
-
-            <button
-              onClick={() => handleJudgeQuickLogin('Code Clash Judge')}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#38bdf8',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '3px',
-                cursor: 'pointer',
-                fontSize: '10.5px',
-                textDecoration: 'underline'
-              }}
-            >
-              <span>Instant Guest Entry</span>
-              <ArrowRight size={10} />
-            </button>
-          </div>
+          {/* Audio Synthesizer Toggle */}
+          <button
+            onClick={onToggleSound}
+            style={{
+              padding: '11px 16px',
+              borderRadius: '999px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              color: soundEnabled ? '#34d399' : 'var(--text-muted)',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              outline: 'none',
+              transition: 'all 0.15s ease'
+            }}
+            title="Audio feedback recommended for full spatial immersion"
+          >
+            <Volume2 size={13} />
+            <span>{soundEnabled ? 'AUDIO SYNTH: ON' : 'AUDIO: OFF'}</span>
+          </button>
         </div>
 
-        {/* Credentials Footer */}
+        {/* Sub-Footer Credentials */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '12px',
-          marginTop: '20px',
-          fontSize: '9.5px',
-          color: '#64748b',
+          gap: '16px',
+          marginTop: '36px',
+          fontSize: '10px',
+          color: 'var(--text-muted)',
           fontFamily: 'var(--font-mono)'
         }}>
           <span>CEA v20.0 (0.716 kg/kWh)</span>
           <span>•</span>
           <span>KPTCL 50.02 Hz</span>
           <span>•</span>
-          <span>NVIDIA JETSON AGX ORIN</span>
+          <span>NVIDIA METROPOLIS</span>
           <span>•</span>
-          <span>ISO 14064</span>
+          <span>THREE.JS WEBGL</span>
         </div>
       </div>
     </div>

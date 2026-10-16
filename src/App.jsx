@@ -26,16 +26,11 @@ export default function App() {
     return { name: 'Code Clash Judge', role: 'JUDGE' };
   });
 
-  const [showLogin, setShowLogin] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return !sessionStorage.getItem('omnicarbon_entered');
-    }
-    return true;
-  });
+  const [showIntro, setShowIntro] = useState(true);
 
   const [viewEngine, setViewEngine] = useState('globe'); // 'globe' | 'campus'
   const [activeMode, setActiveMode] = useState('overview'); // 'overview' | 'vision' | 'simulator' | 'playbook' | 'research'
-  const [soundEnabled, setSoundEnabled] = useState(false); // Clean & silent by default
+  const [soundEnabled, setSoundEnabled] = useState(true); // Atmospheric audio synth enabled
   const [isTourActive, setIsTourActive] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [isDeckOpen, setIsDeckOpen] = useState(false);
@@ -81,6 +76,30 @@ export default function App() {
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + duration);
+    } catch {
+      // AudioContext muted/unsupported
+    }
+  }, [soundEnabled, getAudioContext]);
+
+  // Cinematic Harmonic Swell for Edolus-style Entrance
+  const playIntroSwell = useCallback(() => {
+    if (!soundEnabled || typeof window === 'undefined') return;
+    try {
+      const audioCtx = getAudioContext();
+      if (!audioCtx) return;
+      [110, 220, 330, 440, 550, 660].forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.04 / (idx + 1), audioCtx.currentTime + 0.35);
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 1.8);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 1.8);
+      });
     } catch {
       // AudioContext muted/unsupported
     }
@@ -156,7 +175,7 @@ export default function App() {
         onOpenCopilot={() => setIsCopilotOpen(true)}
         onOpenPresentation={() => setIsDeckOpen(true)}
         currentUser={currentUser}
-        onOpenLogin={() => setShowLogin(true)}
+        onOpenLogin={() => setShowIntro(true)}
       />
 
       {/* Main Workspace with Fast, Clean 140ms Crossfade */}
@@ -226,15 +245,13 @@ export default function App() {
         playSound={playSound}
       />
 
-      {/* SRE Authentication & Telemetry Entry Portal */}
-      {showLogin && (
+      {/* EDOLUS-Inspired Atmospheric Entry Sequence & SRE Calibration Entrance */}
+      {showIntro && (
         <EdolusEntryIntro
           onEnter={(user) => {
-            if (typeof window !== 'undefined') {
-              sessionStorage.setItem('omnicarbon_entered', 'true');
-            }
+            playIntroSwell();
             if (user) setCurrentUser(user);
-            setShowLogin(false);
+            setShowIntro(false);
           }}
           soundEnabled={soundEnabled}
           onToggleSound={() => setSoundEnabled(!soundEnabled)}
