@@ -75,7 +75,8 @@ export default function TopNav({
             width: '24px',
             height: '24px',
             borderRadius: '5px',
-            background: '#238636',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -258,9 +259,9 @@ export default function TopNav({
           style={{
             padding: '4px 11px',
             borderRadius: '6px',
-            background: 'rgba(212, 255, 0, 0.1)',
-            border: '1px solid rgba(212, 255, 0, 0.35)',
-            color: '#d4ff00',
+            background: 'rgba(245, 158, 11, 0.12)',
+            border: '1px solid rgba(245, 158, 11, 0.35)',
+            color: '#fbbf24',
             fontSize: '11px',
             fontWeight: 700,
             fontFamily: 'var(--font-mono, monospace)',
@@ -271,6 +272,8 @@ export default function TopNav({
             transition: 'all 0.15s ease'
           }}
           title="Open Edolus-Style Cinematic PPT Slide Deck (P)"
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.2)'; e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.5)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.12)'; e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.35)'; }}
         >
           <Presentation size={12} />
           <span>EDOLUS PPT</span>
@@ -282,7 +285,7 @@ export default function TopNav({
           style={{
             padding: '4px 11px',
             borderRadius: '6px',
-            background: isTourActive ? '#238636' : 'rgba(255, 255, 255, 0.04)',
+            background: isTourActive ? '#10b981' : 'rgba(255, 255, 255, 0.04)',
             border: '1px solid rgba(255, 255, 255, 0.12)',
             color: isTourActive ? '#ffffff' : '#f0f6fc',
             fontSize: '11px',
@@ -294,6 +297,8 @@ export default function TopNav({
             transition: 'all 0.15s ease'
           }}
           title="Run 1-Click Code Clash Judge Demo Tour"
+          onMouseEnter={e => { if (!isTourActive) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; }}
+          onMouseLeave={e => { if (!isTourActive) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)'; }}
         >
           <Play size={10} fill="currentColor" />
           <span>{isTourActive ? 'Touring...' : 'Judge Tour'}</span>
@@ -303,27 +308,29 @@ export default function TopNav({
         <button
           onClick={onOpenCopilot}
           style={{
-            padding: '4px 10px',
+            padding: '4px 11px',
             borderRadius: '6px',
-            background: 'linear-gradient(135deg, #1f6feb 0%, #238636 100%)',
-            border: 'none',
-            color: '#ffffff',
+            background: 'rgba(16, 185, 129, 0.16)',
+            border: '1px solid rgba(16, 185, 129, 0.45)',
+            color: '#34d399',
             fontSize: '11px',
             fontWeight: 600,
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
             cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(31, 111, 235, 0.3)',
-            transition: 'transform 0.12s ease'
+            boxShadow: '0 2px 10px rgba(16, 185, 129, 0.15)',
+            transition: 'all 0.15s ease'
           }}
           onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
           onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(16, 185, 129, 0.24)'; e.currentTarget.style.borderColor = '#10b981'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(16, 185, 129, 0.16)'; e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.45)'; }}
           title="Open OmniAgent Decarbonization AI Copilot (Cmd+K)"
         >
-          <Sparkles size={11} />
-          <span>AI Copilot</span>
-          <span style={{ fontSize: '9px', opacity: 0.85, padding: '1px 4px', background: 'rgba(0, 0, 0, 0.25)', borderRadius: '3px', fontFamily: 'var(--font-mono)' }}>⌘K</span>
+          <Sparkles size={11} color="#34d399" />
+          <span style={{ color: '#f8fafc' }}>AI Copilot</span>
+          <span style={{ fontSize: '9px', opacity: 0.9, padding: '1px 4px', background: 'rgba(0, 0, 0, 0.35)', color: '#34d399', borderRadius: '3px', fontFamily: 'var(--font-mono)' }}>⌘K</span>
         </button>
 
         {/* Audio Toggle */}

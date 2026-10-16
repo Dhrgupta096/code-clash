@@ -336,11 +336,11 @@ export default function AICopilotDrawer({
         width: '100%',
         maxWidth: '540px',
         height: '100%',
-        background: '#0d1117',
+        background: '#0b0e14',
         borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '-16px 0 48px rgba(0, 0, 0, 0.8)',
+        boxShadow: '-16px 0 48px rgba(0, 0, 0, 0.85)',
         animation: 'slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1)'
       }}>
         {/* Drawer Header */}
@@ -350,19 +350,19 @@ export default function AICopilotDrawer({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'rgba(22, 27, 34, 0.95)'
+          background: 'rgba(16, 21, 30, 0.95)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               width: '32px',
               height: '32px',
               borderRadius: '7px',
-              background: 'linear-gradient(135deg, #1f6feb 0%, #238636 100%)',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#ffffff',
-              boxShadow: '0 2px 10px rgba(31, 111, 235, 0.35)'
+              boxShadow: '0 2px 10px rgba(16, 185, 129, 0.3)'
             }}>
               <Sparkles size={17} />
             </div>

@@ -118,6 +118,7 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
 
   const targetRotationRef = useRef({ y: REGIONS[0].rot.y, x: REGIONS[0].rot.x });
   const beaconGroupRef = useRef(null);
+  const globeGroupRef = useRef(null);
   const selectedRegion = REGIONS[selectedRegionIndex];
 
   // Helper to convert lat/lon to Three.js 3D Vector on globe sphere
@@ -141,11 +142,19 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
     beaconGroupRef.current.visible = true;
   }, [latLonToVector3]);
 
-  // Rotate Earth Sphere smoothly to face given coordinates
+  // Rotate Earth Sphere smoothly to face given coordinates (shortest arc, zero endless spinning)
   const orientGlobeToCoords = useCallback((lat, lon) => {
+    const rawTargetY = 2.85 + (lon * Math.PI) / 180;
+    const currentY = globeGroupRef.current ? globeGroupRef.current.rotation.y : targetRotationRef.current.y;
+    
+    // Shortest angular difference bounded in [-PI, PI] to prevent infinite spins
+    let deltaY = (rawTargetY - currentY) % (Math.PI * 2);
+    if (deltaY < -Math.PI) deltaY += Math.PI * 2;
+    if (deltaY > Math.PI) deltaY -= Math.PI * 2;
+
     targetRotationRef.current = {
-      y: 2.85 + (lon * Math.PI) / 180,
-      x: (lat * Math.PI) / 180 * 0.9
+      y: currentY + deltaY,
+      x: Math.max(-0.85, Math.min(0.85, (lat * Math.PI) / 180 * 0.75))
     };
   }, []);
 
@@ -260,12 +269,17 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
     currentMount.appendChild(renderer.domElement);
 
     const globeGroup = new THREE.Group();
+    globeGroupRef.current = globeGroup;
     scene.add(globeGroup);
 
     // 1. Core Earth Sphere with Local NASA High-Res Texture
     const textureLoader = new THREE.TextureLoader();
-    const dayTexture = textureLoader.load('/textures/earth_daymap.jpg');
-    const cloudsTexture = textureLoader.load('/textures/earth_clouds.png');
+    const basePath = import.meta.env.BASE_URL || './';
+    const cleanBase = basePath.endsWith('/') ? basePath : `${basePath}/`;
+    const dayTexture = textureLoader.load(`${cleanBase}textures/earth_daymap.jpg`);
+    const cloudsTexture = textureLoader.load(`${cleanBase}textures/earth_clouds.png`);
+    dayTexture.colorSpace = THREE.SRGBColorSpace;
+    cloudsTexture.colorSpace = THREE.SRGBColorSpace;
 
     const earthGeo = new THREE.SphereGeometry(60, 64, 64);
     const earthMat = new THREE.MeshStandardMaterial({
@@ -562,8 +576,11 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
       if (!isDragging) {
         globeGroup.rotation.y += (targetRotationRef.current.y - globeGroup.rotation.y) * 0.06;
         globeGroup.rotation.x += (targetRotationRef.current.x - globeGroup.rotation.x) * 0.06;
-        // Subtle planetary drift
-        targetRotationRef.current.y += 0.0006;
+        // Subtle planetary drift only when settled on target (prevents runaway angle accumulation)
+        if (Math.abs(targetRotationRef.current.y - globeGroup.rotation.y) < 0.05) {
+          targetRotationRef.current.y += 0.0003;
+          globeGroup.rotation.y += 0.0003;
+        }
       }
 
       // Clouds rotate slightly faster for realistic atmospheric drift
@@ -591,6 +608,7 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
     animate();
 
     return () => {
+      globeGroupRef.current = null;
       cancelAnimationFrame(animationFrameId);
       currentMount.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);

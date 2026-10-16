@@ -10,6 +10,7 @@ import JudgeDemoTour from './components/JudgeDemoTour';
 import PageTransition from './components/PageTransition';
 import AICopilotDrawer from './components/AICopilotDrawer';
 import EdolusPresentationDeck from './components/EdolusPresentationDeck';
+import ClickSpark from './components/reactbits/ClickSpark';
 
 export default function App() {
   const [viewEngine, setViewEngine] = useState('globe'); // 'globe' | 'campus'
@@ -105,16 +106,23 @@ export default function App() {
   const pageKey = activeMode === 'overview' ? `overview-${viewEngine}` : activeMode;
 
   return (
-    <div style={{
-      width: '100vw',
-      height: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      background: '#090d16',
-      overflow: 'hidden',
-      color: '#f0f6fc',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    }}>
+    <ClickSpark
+      sparkColor={['#10b981', '#38bdf8', '#f8fafc', '#34d399', '#60a5fa']}
+      sparkSize={10}
+      sparkRadius={26}
+      sparkCount={9}
+      duration={380}
+    >
+      <div style={{
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#0a0d14',
+        overflow: 'hidden',
+        color: '#f8fafc',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
       {/* Git/Linear-style Top Command Bar */}
       <TopNav
         activeMode={activeMode}
@@ -196,5 +204,6 @@ export default function App() {
         playSound={playSound}
       />
     </div>
+    </ClickSpark>
   );
 }

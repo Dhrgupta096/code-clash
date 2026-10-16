@@ -1,6 +1,6 @@
 .option-wheel {
   --ow-text-color: #64748b;
-  --ow-active-color: #d4ff00;
+  --ow-active-color: #10b981;
   --ow-font-size: 1.25rem;
   --ow-inset: 24px;
 
@@ -46,5 +46,5 @@
 
 .option-wheel__item--selected {
   font-weight: 800;
-  text-shadow: 0 0 16px rgba(212, 255, 0, 0.45);
+  text-shadow: 0 0 16px rgba(16, 185, 129, 0.45);
 }

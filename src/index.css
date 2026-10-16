@@ -5,25 +5,30 @@
    ========================================================================== */
 
 :root {
-  --bg-canvas: #08090d;
-  --bg-panel: rgba(14, 16, 23, 0.75);
-  --bg-card: rgba(20, 23, 34, 0.6);
-  --bg-card-hover: rgba(28, 32, 48, 0.75);
+  --bg-canvas: #0a0c10;
+  --bg-panel: rgba(15, 19, 26, 0.82);
+  --bg-card: rgba(18, 23, 32, 0.68);
+  --bg-card-hover: rgba(24, 31, 44, 0.8);
   --bg-pill: rgba(255, 255, 255, 0.05);
   --bg-pill-hover: rgba(255, 255, 255, 0.09);
 
-  --border-subtle: rgba(255, 255, 255, 0.07);
-  --border-medium: rgba(255, 255, 255, 0.12);
-  --border-active: rgba(212, 255, 0, 0.4);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.14);
+  --border-active: rgba(16, 185, 129, 0.45);
   
-  --phosphor: #d4ff00;       /* React Bits / Laser Lime Accent */
-  --phosphor-glow: rgba(212, 255, 0, 0.2);
-  --thermal: #ff5500;        /* Thermal / Alert */
-  --cyan: #38bdf8;           /* Sky / Telemetry */
-  --emerald: #10b981;        /* Clean Solar / Offset */
+  --brand-primary: #10b981;    /* Clean Solar Emerald */
+  --brand-light: #34d399;
+  --brand-glow: rgba(16, 185, 129, 0.2);
+  
+  --phosphor: #10b981;         /* Refined Emerald (Replaced harsh neon lime) */
+  --phosphor-glow: rgba(16, 185, 129, 0.25);
+  --thermal: #f97316;          /* Warm Amber-Orange (Replaced harsh red) */
+  --cyan: #38bdf8;             /* Sky / Telemetry */
+  --emerald: #10b981;          /* Clean Solar / Offset */
+  --amber: #f59e0b;            /* Executive Gold / Amber (Replaced arcade yellow) */
 
   --text-pure: #ffffff;
-  --text-main: #f1f5f9;
+  --text-main: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
 
@@ -64,7 +69,7 @@ html, body {
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  background: radial-gradient(circle at 50% 0%, #161826 0%, #090a0f 60%, #050508 100%);
+  background: radial-gradient(circle at 50% -10%, #121722 0%, #0a0d14 65%, #07090e 100%);
 }
 
 /* Tabular figures for telemetry & numbers */
