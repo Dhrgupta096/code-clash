@@ -9,6 +9,7 @@ import ResearchDossier from './components/ResearchDossier';
 import JudgeDemoTour from './components/JudgeDemoTour';
 import PageTransition from './components/PageTransition';
 import AICopilotDrawer from './components/AICopilotDrawer';
+import EdolusPresentationDeck from './components/EdolusPresentationDeck';
 
 export default function App() {
   const [viewEngine, setViewEngine] = useState('globe'); // 'globe' | 'campus'
@@ -16,6 +17,7 @@ export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(false); // Clean & silent by default
   const [isTourActive, setIsTourActive] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+  const [isDeckOpen, setIsDeckOpen] = useState(false);
 
   // Unified Simulation State
   const [simState, setSimState] = useState({
@@ -63,12 +65,17 @@ export default function App() {
     }
   }, [soundEnabled, getAudioContext]);
 
-  // Keyboard shortcut (Cmd+K / Ctrl+K) for AI Copilot
+  // Keyboard shortcut (Cmd+K / Ctrl+K) for AI Copilot & 'P' for Presentation Deck
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (['input', 'textarea', 'select'].includes(e.target?.tagName?.toLowerCase())) return;
+
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsCopilotOpen(prev => !prev);
+      } else if (e.key.toLowerCase() === 'p' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setIsDeckOpen(prev => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -119,6 +126,7 @@ export default function App() {
         isTourActive={isTourActive}
         onStartJudgeTour={() => setIsTourActive(true)}
         onOpenCopilot={() => setIsCopilotOpen(true)}
+        onOpenPresentation={() => setIsDeckOpen(true)}
       />
 
       {/* Main Workspace with Fast, Clean 140ms Crossfade */}
@@ -161,6 +169,9 @@ export default function App() {
         isOpen={isCopilotOpen}
         onClose={() => setIsCopilotOpen(false)}
         simState={simState}
+        setSimState={setSimState}
+        setActiveMode={handleModeTransition}
+        setViewEngine={handleEngineTransition}
         playSound={playSound}
       />
 
@@ -173,6 +184,15 @@ export default function App() {
           if (engine) handleEngineTransition(engine);
         }}
         onSimStateChange={setSimState}
+        playSound={playSound}
+      />
+
+      {/* Full-Screen Edolus-Style Cinematic PPT Slide Deck */}
+      <EdolusPresentationDeck
+        isOpen={isDeckOpen}
+        onClose={() => setIsDeckOpen(false)}
+        soundEnabled={soundEnabled}
+        onToggleSound={() => setSoundEnabled(!soundEnabled)}
         playSound={playSound}
       />
     </div>

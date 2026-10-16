@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Building2, Eye, Sliders, BookOpen, Volume2, VolumeX, Zap, Play, Sparkles, GitBranch } from 'lucide-react';
+import { Globe, Building2, Eye, Sliders, BookOpen, Volume2, VolumeX, Zap, Play, Sparkles, GitBranch, Presentation } from 'lucide-react';
 import { ApiClient } from '../services/apiClient';
 
 export default function TopNav({
@@ -11,7 +11,8 @@ export default function TopNav({
   setSoundEnabled,
   isTourActive,
   onStartJudgeTour,
-  onOpenCopilot
+  onOpenCopilot,
+  onOpenPresentation
 }) {
   const [time, setTime] = useState('');
   const [gridFreq, setGridFreq] = useState('50.02');
@@ -251,6 +252,30 @@ export default function TopNav({
           <span>{backendOnline ? 'API :3001' : 'STATIC'}</span>
         </div>
 
+        {/* Edolus-Style Cinematic PPT Deck Button */}
+        <button
+          onClick={onOpenPresentation}
+          style={{
+            padding: '4px 11px',
+            borderRadius: '6px',
+            background: 'rgba(212, 255, 0, 0.1)',
+            border: '1px solid rgba(212, 255, 0, 0.35)',
+            color: '#d4ff00',
+            fontSize: '11px',
+            fontWeight: 700,
+            fontFamily: 'var(--font-mono, monospace)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+          title="Open Edolus-Style Cinematic PPT Slide Deck (P)"
+        >
+          <Presentation size={12} />
+          <span>EDOLUS PPT</span>
+        </button>
+
         {/* Tour Demo Button */}
         <button
           onClick={onStartJudgeTour}
@@ -278,7 +303,7 @@ export default function TopNav({
         <button
           onClick={onOpenCopilot}
           style={{
-            padding: '4px 12px',
+            padding: '4px 10px',
             borderRadius: '6px',
             background: 'linear-gradient(135deg, #1f6feb 0%, #238636 100%)',
             border: 'none',
@@ -294,10 +319,11 @@ export default function TopNav({
           }}
           onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
           onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-          title="Open OmniAgent Decarbonization AI Copilot"
+          title="Open OmniAgent Decarbonization AI Copilot (Cmd+K)"
         >
           <Sparkles size={11} />
           <span>AI Copilot</span>
+          <span style={{ fontSize: '9px', opacity: 0.85, padding: '1px 4px', background: 'rgba(0, 0, 0, 0.25)', borderRadius: '3px', fontFamily: 'var(--font-mono)' }}>⌘K</span>
         </button>
 
         {/* Audio Toggle */}
