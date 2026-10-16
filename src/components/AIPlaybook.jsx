@@ -3,6 +3,7 @@ import { FileText, Download, CheckCircle, ShieldCheck, Sparkles, TrendingUp, Ale
 import SpotlightCard from './reactbits/SpotlightCard';
 import Magnet from './reactbits/Magnet';
 import ShinyText from './reactbits/ShinyText';
+import { ApiClient } from '../services/apiClient';
 
 const SUGGESTED_PROMPTS = [
   "How can DSU reach Net-Zero by 2030?",
@@ -117,7 +118,7 @@ Platform Version: 2.6 Enterprise Edition
     return reply;
   };
 
-  const handleSendMessage = (overrideQuery) => {
+  const handleSendMessage = async (overrideQuery) => {
     const textToSend = overrideQuery || userInput;
     if (!textToSend.trim()) return;
 
@@ -135,7 +136,20 @@ Platform Version: 2.6 Enterprise Edition
     if (!overrideQuery) setUserInput('');
     setIsTyping(true);
 
-    setTimeout(() => {
+    try {
+      const backendResponse = await ApiClient.sendAIChat(textToSend, simState);
+      const agentReply = backendResponse?.answer || generateAgentResponse(textToSend);
+
+      setChatMessages([
+        ...newMessages,
+        {
+          role: 'assistant',
+          time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+          content: agentReply,
+          provider: backendResponse?.provider
+        }
+      ]);
+    } catch {
       const agentReply = generateAgentResponse(textToSend);
       setChatMessages([
         ...newMessages,
@@ -145,9 +159,10 @@ Platform Version: 2.6 Enterprise Edition
           content: agentReply
         }
       ]);
+    } finally {
       setIsTyping(false);
       if (playSound) playSound(720, 'triangle', 0.08);
-    }, 600);
+    }
   };
 
   return (

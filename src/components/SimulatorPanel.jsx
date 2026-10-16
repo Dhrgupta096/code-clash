@@ -1,13 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sliders, GitFork, ArrowDownRight, DollarSign, Leaf, Zap, BarChart3, CheckCircle2 } from 'lucide-react';
 import ShinyText from './reactbits/ShinyText';
 import SpotlightCard from './reactbits/SpotlightCard';
 import Magnet from './reactbits/Magnet';
 import MicrogridLoadChart from './MicrogridLoadChart';
 import FleetRouteTelemetry from './FleetRouteTelemetry';
+import { ApiClient } from '../services/apiClient';
 
 export default function SimulatorPanel({ simState, setSimState, onOpenPlaybook, playSound }) {
   const [activeBranch, setActiveBranch] = useState('alpha');
+  const [backendSimulation, setBackendSimulation] = useState(null);
+
+  useEffect(() => {
+    let isCancelled = false;
+    const fetchSim = async () => {
+      const result = await ApiClient.runSimulation(simState);
+      if (!isCancelled && result) {
+        setBackendSimulation(result);
+      }
+    };
+    fetchSim();
+    return () => { isCancelled = true; };
+  }, [simState]);
 
   // Mathematical Emission Reduction Calculations
   const fleetEv = simState.fleetEv; // 0 to 100%
@@ -24,12 +38,16 @@ export default function SimulatorPanel({ simState, setSimState, onOpenPlaybook, 
   const solarReduction = ((solarCapacity - 100) / 100) * 32;
   const hvacReduction = 28 * (hvacOpt / 100);
 
-  const totalCarbonSaved = Math.min(baselineEmissions * 0.85, (fleetReduction + computeReduction + solarReduction + hvacReduction));
-  const currentEmissions = Math.max(45, baselineEmissions - totalCarbonSaved);
-  const percentReduction = ((totalCarbonSaved / baselineEmissions) * 100).toFixed(1);
+  const totalCarbonSaved = backendSimulation?.summary?.netCarbonAvoidedTons 
+    ?? Math.min(baselineEmissions * 0.85, (fleetReduction + computeReduction + solarReduction + hvacReduction));
+  const currentEmissions = backendSimulation?.summary?.targetEmissionsTons 
+    ?? Math.max(45, baselineEmissions - totalCarbonSaved);
+  const percentReduction = backendSimulation?.summary?.percentDecarbonized?.toFixed(1) 
+    ?? ((totalCarbonSaved / baselineEmissions) * 100).toFixed(1);
 
   // Financial Savings in Lakhs INR (1 Lakh = 100,000 INR)
-  const annualSavingsINR = ((fleetReduction * 14000 + computeReduction * 18000 + solarReduction * 16000 + hvacReduction * 11000) / 100000).toFixed(2);
+  const annualSavingsINR = backendSimulation?.financials?.annualTotalSavingsLakhs?.toFixed(2)
+    ?? ((fleetReduction * 14000 + computeReduction * 18000 + solarReduction * 16000 + hvacReduction * 11000) / 100000).toFixed(2);
 
   return (
     <div style={{

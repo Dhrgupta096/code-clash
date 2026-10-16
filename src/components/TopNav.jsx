@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Globe, Building2, Eye, Sliders, FileText, Volume2, VolumeX, BookOpen, Activity, ShieldCheck, Zap, Play } from 'lucide-react';
 import ShinyText from './reactbits/ShinyText';
 import Magnet from './reactbits/Magnet';
+import { ApiClient } from '../services/apiClient';
 
 export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewEngine, soundEnabled, setSoundEnabled, fps: externalFps, isTourActive, onStartJudgeTour, onReplayIntro }) {
   const [time, setTime] = useState('');
   const [gridFreq, setGridFreq] = useState('50.02');
   const [localFps, setLocalFps] = useState('60.0');
+  const [backendOnline, setBackendOnline] = useState(false);
 
   useEffect(() => {
     let frameCount = 0;
@@ -30,14 +32,36 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
       setTime(dateObj.toLocaleTimeString('en-US', { hour12: false }));
       // Karnataka SLDC Nominal 50Hz dynamic micro-fluctuation
       const jitter = (50.00 + (Math.sin(Date.now() / 3000) * 0.025) + ((Math.random() - 0.5) * 0.008)).toFixed(2);
-      setGridFreq(jitter);
+      setGridFreq(prev => (prev === '50.02' ? jitter : prev));
     };
 
     const timer = setInterval(updateTime, 1000);
     updateTime();
 
+    // Check backend health & telemetry every 3 seconds
+    const checkBackend = async () => {
+      try {
+        const health = await ApiClient.checkHealth();
+        if (health && health.status === 'ONLINE') {
+          setBackendOnline(true);
+          const telemetry = await ApiClient.getGridTelemetry();
+          if (telemetry?.grid?.frequencyHz) {
+            setGridFreq(telemetry.grid.frequencyHz.toFixed(2));
+          }
+        } else {
+          setBackendOnline(false);
+        }
+      } catch {
+        setBackendOnline(false);
+      }
+    };
+
+    checkBackend();
+    const backendTimer = setInterval(checkBackend, 3000);
+
     return () => {
       clearInterval(timer);
+      clearInterval(backendTimer);
       cancelAnimationFrame(animId);
     };
   }, []);
@@ -237,6 +261,27 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
           <Zap size={10} color="var(--cyan)" />
           <span className="mono-nums" style={{ color: 'var(--text-pure)', fontWeight: 700 }}>
             {gridFreq} Hz
+          </span>
+        </div>
+
+        {/* Backend SRE Control Plane Status */}
+        <div 
+          className="telemetry-chip" 
+          title={backendOnline ? "OMNICARBON Bun/Node SRE Backend Connected on Port 3001" : "Static Client Mode Active"}
+          style={{
+            borderColor: backendOnline ? 'rgba(34, 197, 94, 0.4)' : 'rgba(255, 255, 255, 0.08)',
+            background: backendOnline ? 'rgba(34, 197, 94, 0.08)' : 'rgba(255, 255, 255, 0.03)'
+          }}
+        >
+          <span style={{
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            background: backendOnline ? '#22c55e' : '#64748b',
+            boxShadow: backendOnline ? '0 0 8px #22c55e' : 'none'
+          }} />
+          <span style={{ fontSize: '9px', fontWeight: 700, color: backendOnline ? '#22c55e' : 'var(--text-muted)' }}>
+            {backendOnline ? 'BACKEND :3001' : 'STATIC'}
           </span>
         </div>
 

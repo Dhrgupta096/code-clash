@@ -8,6 +8,7 @@ import {
 import ShinyText from './reactbits/ShinyText';
 import SpotlightCard from './reactbits/SpotlightCard';
 import Magnet from './reactbits/Magnet';
+import { ApiClient } from '../services/apiClient';
 
 const CAMERAS = [
   {
@@ -398,6 +399,18 @@ export default function VisionFeed({ simState = { fleetEv: 30, aiSolarShift: tru
       { time: now, text: `✓ DISPATCH CONFIRMED: Gate 1 Security Marshal notified driver of Shuttle #12. Engine turned off. Tailpipe burn halted.` },
       ...prev.slice(0, 5)
     ]);
+
+    // Report and log on backend SRE control plane
+    ApiClient.reportIdleViolation({
+      cameraId: 'cam-01',
+      cameraName: 'DSU South Gate Transit Loop',
+      vehicleId: 'BUS-12',
+      label: 'Diesel Shuttle #12',
+      plate: 'KA-05-MN-8841',
+      engineType: 'BS-IV 6-Cylinder Turbo Diesel',
+      idleDurationMinutes: 8.7,
+      driverNotified: true
+    }).catch(() => {});
   };
 
   const handleTriggerLaserSweep = (id) => {
