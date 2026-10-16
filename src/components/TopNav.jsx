@@ -1,36 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Building2, Eye, Sliders, FileText, Volume2, VolumeX, BookOpen, Activity, ShieldCheck, Zap, Play } from 'lucide-react';
-import ShinyText from './reactbits/ShinyText';
-import Magnet from './reactbits/Magnet';
+import { Globe, Building2, Eye, Sliders, BookOpen, Volume2, VolumeX, Zap, Play, Sparkles, GitBranch } from 'lucide-react';
 import { ApiClient } from '../services/apiClient';
 
-export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewEngine, soundEnabled, setSoundEnabled, fps: externalFps, isTourActive, onStartJudgeTour, onReplayIntro }) {
+export default function TopNav({
+  activeMode,
+  setActiveMode,
+  viewEngine,
+  setViewEngine,
+  soundEnabled,
+  setSoundEnabled,
+  isTourActive,
+  onStartJudgeTour,
+  onOpenCopilot
+}) {
   const [time, setTime] = useState('');
   const [gridFreq, setGridFreq] = useState('50.02');
-  const [localFps, setLocalFps] = useState('60.0');
   const [backendOnline, setBackendOnline] = useState(false);
 
   useEffect(() => {
-    let frameCount = 0;
-    let lastTime = performance.now();
-    let animId = 0;
-
-    const countFrames = () => {
-      frameCount++;
-      animId = requestAnimationFrame(countFrames);
-    };
-    animId = requestAnimationFrame(countFrames);
-
     const updateTime = () => {
-      const now = performance.now();
-      const currentFps = ((frameCount * 1000) / (now - lastTime)).toFixed(1);
-      setLocalFps(currentFps > 60 ? '60.0' : currentFps);
-      frameCount = 0;
-      lastTime = now;
-
       const dateObj = new Date();
       setTime(dateObj.toLocaleTimeString('en-US', { hour12: false }));
-      // Karnataka SLDC Nominal 50Hz dynamic micro-fluctuation
       const jitter = (50.00 + (Math.sin(Date.now() / 3000) * 0.025) + ((Math.random() - 0.5) * 0.008)).toFixed(2);
       setGridFreq(prev => (prev === '50.02' ? jitter : prev));
     };
@@ -38,7 +28,7 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
     const timer = setInterval(updateTime, 1000);
     updateTime();
 
-    // Check backend health & telemetry every 3 seconds
+    // Check backend health & telemetry
     const checkBackend = async () => {
       try {
         const health = await ApiClient.checkHealth();
@@ -62,272 +52,273 @@ export default function TopNav({ activeMode, setActiveMode, viewEngine, setViewE
     return () => {
       clearInterval(timer);
       clearInterval(backendTimer);
-      cancelAnimationFrame(animId);
     };
   }, []);
 
   return (
     <header style={{
-      height: '56px',
-      background: 'rgba(6, 7, 10, 0.88)',
-      backdropFilter: 'blur(28px)',
-      WebkitBackdropFilter: 'blur(28px)',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.07)',
+      height: '52px',
+      background: '#0d1117',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 20px',
+      padding: '0 18px',
       zIndex: 100,
       flexShrink: 0
     }}>
-      {/* Brand & Identity with Swiss Architectural Layout */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <div
-          onClick={onReplayIntro}
-          title="Click to replay EDOLUS-inspired atmospheric bootloader sequence"
-          style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: onReplayIntro ? 'pointer' : 'default', userSelect: 'none' }}
-        >
+      {/* Left: Git-style Breadcrumb & Twin Switcher */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{
-            width: '26px',
-            height: '26px',
+            width: '24px',
+            height: '24px',
             borderRadius: '5px',
-            background: 'var(--phosphor)',
+            background: '#238636',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#08090d',
-            fontWeight: 900,
-            fontSize: '13px',
-            boxShadow: '0 0 16px rgba(212, 255, 0, 0.35)',
-            letterSpacing: '-0.02em',
-            transition: 'transform 0.15s ease'
+            color: '#ffffff',
+            fontWeight: 800,
+            fontSize: '12px'
           }}>
             Ω
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-              <ShinyText text="OMNICARBON" color="#ffffff" shineColor="#d4ff00" speed={3} shineWidth={50} style={{ fontSize: '14px', fontWeight: 800, letterSpacing: '-0.03em' }} />
-              <span className="swiss-label" style={{ color: 'var(--phosphor)', fontSize: '9px' }}>DSU // SRE</span>
-            </div>
-            <span style={{ fontSize: '9.5px', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-              KPTCL GRID • 12.97° N, 77.59° E
-            </span>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600 }}>
+            <span style={{ color: '#8b949e' }}>dsu</span>
+            <span style={{ color: '#484f58' }}>/</span>
+            <span style={{ color: '#f0f6fc', fontWeight: 700 }}>omnicarbon</span>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '10px',
+            padding: '2px 7px',
+            borderRadius: '12px',
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            color: '#8b949e'
+          }}>
+            <GitBranch size={10} />
+            <span>main</span>
           </div>
         </div>
 
-        {/* Minimalist Divider */}
-        <div style={{ height: '16px', width: '1px', background: 'rgba(255, 255, 255, 0.08)' }} />
+        {/* Divider */}
+        <div style={{ height: '14px', width: '1px', background: 'rgba(255, 255, 255, 0.08)' }} />
 
-        {/* Dual Engine Switcher Pill with Magnet */}
-        <div style={{
-          display: 'flex',
-          background: 'rgba(255, 255, 255, 0.04)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '999px',
-          padding: '2px',
-          gap: '2px'
-        }}>
-          <Magnet padding={40} magnetStrength={3} maxOffset={8}>
+        {/* 3D Twin View Switcher (Globe vs Campus) */}
+        {activeMode === 'overview' && (
+          <div style={{
+            display: 'flex',
+            background: '#161b22',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '6px',
+            padding: '2px',
+            gap: '2px'
+          }}>
             <button
               onClick={() => setViewEngine('globe')}
               style={{
-                padding: '4px 12px',
-                borderRadius: '999px',
-                background: viewEngine === 'globe' ? 'rgba(56, 189, 248, 0.16)' : 'transparent',
-                border: viewEngine === 'globe' ? '1px solid rgba(56, 189, 248, 0.4)' : '1px solid transparent',
-                color: viewEngine === 'globe' ? 'var(--cyan)' : 'var(--text-secondary)',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: viewEngine === 'globe' ? '#21262d' : 'transparent',
+                color: viewEngine === 'globe' ? '#f0f6fc' : '#8b949e',
+                border: 'none',
                 fontSize: '11px',
                 fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                outline: 'none',
-                fontFamily: 'var(--font-mono)'
+                transition: 'all 0.15s ease'
               }}
             >
-              <Globe size={11} color={viewEngine === 'globe' ? 'var(--cyan)' : 'currentColor'} />
-              <span>EARTH 3D</span>
+              <Globe size={11} color={viewEngine === 'globe' ? '#38bdf8' : 'currentColor'} />
+              <span>Globe</span>
             </button>
-          </Magnet>
 
-          <Magnet padding={40} magnetStrength={3} maxOffset={8}>
             <button
               onClick={() => setViewEngine('campus')}
               style={{
-                padding: '4px 12px',
-                borderRadius: '999px',
-                background: viewEngine === 'campus' ? 'rgba(212, 255, 0, 0.14)' : 'transparent',
-                border: viewEngine === 'campus' ? '1px solid var(--border-active)' : '1px solid transparent',
-                color: viewEngine === 'campus' ? 'var(--phosphor)' : 'var(--text-secondary)',
+                padding: '4px 10px',
+                borderRadius: '4px',
+                background: viewEngine === 'campus' ? '#21262d' : 'transparent',
+                color: viewEngine === 'campus' ? '#f0f6fc' : '#8b949e',
+                border: 'none',
                 fontSize: '11px',
                 fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                outline: 'none',
-                fontFamily: 'var(--font-mono)'
+                transition: 'all 0.15s ease'
               }}
             >
-              <Building2 size={11} color={viewEngine === 'campus' ? 'var(--phosphor)' : 'currentColor'} />
-              <span>DSU TWIN</span>
+              <Building2 size={11} color={viewEngine === 'campus' ? '#3fb950' : 'currentColor'} />
+              <span>Campus Twin</span>
             </button>
-          </Magnet>
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Mode Selectors (Clean Swiss Navigation) */}
+      {/* Center: Clean Navigation Tabs */}
       <nav style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '4px',
-        background: 'rgba(255, 255, 255, 0.03)',
-        padding: '3px',
-        borderRadius: '999px',
-        border: '1px solid rgba(255, 255, 255, 0.07)'
+        gap: '2px',
+        background: '#161b22',
+        padding: '2px',
+        borderRadius: '8px',
+        border: '1px solid rgba(255, 255, 255, 0.06)'
       }}>
         {[
-          { id: 'overview', label: 'Overview', icon: Activity },
-          { id: 'vision', label: 'Metropolis CV', icon: Eye },
-          { id: 'simulator', label: 'What-If Sandbox', icon: Sliders },
-          { id: 'playbook', label: 'AI Playbook', icon: FileText },
-          { id: 'research', label: 'KA Science & Audit', icon: BookOpen }
+          { id: 'overview', label: 'Digital Twin', icon: Globe },
+          { id: 'vision', label: 'Metropolis Vision', icon: Eye },
+          { id: 'simulator', label: 'Sandbox', icon: Sliders },
+          { id: 'research', label: 'Audit & Science', icon: BookOpen }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeMode === tab.id;
           return (
-            <Magnet key={tab.id} padding={50} magnetStrength={3} maxOffset={8}>
-              <button
-                onClick={() => setActiveMode(tab.id)}
-                style={{
-                  padding: '5px 14px',
-                  borderRadius: '999px',
-                  background: isActive ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
-                  border: isActive ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid transparent',
-                  color: isActive ? 'var(--text-pure)' : 'var(--text-secondary)',
-                  fontSize: '11.5px',
-                  fontWeight: isActive ? 600 : 500,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  outline: 'none'
-                }}
-              >
-                <Icon size={12} color={isActive ? 'var(--phosphor)' : 'var(--text-secondary)'} />
-                <span>{tab.label}</span>
-              </button>
-            </Magnet>
+            <button
+              key={tab.id}
+              onClick={() => setActiveMode(tab.id)}
+              style={{
+                padding: '5px 13px',
+                borderRadius: '6px',
+                background: isActive ? '#21262d' : 'transparent',
+                color: isActive ? '#f0f6fc' : '#8b949e',
+                border: 'none',
+                fontSize: '11.5px',
+                fontWeight: isActive ? 600 : 500,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Icon size={12} color={isActive ? '#3fb950' : '#8b949e'} />
+              <span>{tab.label}</span>
+            </button>
           );
         })}
       </nav>
 
-      {/* Right Telemetry: Judge Tour Button & Subtle System Monitor */}
+      {/* Right: Telemetry & Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        
-        {/* Run SRE Judge Demo Tour Action Button - Highlighted for Judges */}
-        <Magnet padding={35} magnetStrength={3} maxOffset={6}>
-          <button
-            onClick={onStartJudgeTour}
-            style={{
-              padding: '5px 14px',
-              borderRadius: '999px',
-              background: isTourActive ? 'var(--phosphor)' : 'rgba(212, 255, 0, 0.15)',
-              border: isTourActive ? '1.5px solid var(--phosphor)' : '1px solid var(--border-active)',
-              color: isTourActive ? '#05070a' : 'var(--phosphor)',
-              fontSize: '11px',
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-mono)',
-              boxShadow: isTourActive ? '0 0 16px rgba(212, 255, 0, 0.6)' : '0 0 12px rgba(212, 255, 0, 0.25)',
-              transition: 'all 0.15s ease'
-            }}
-            title="Start Automated 1-Click Code Clash SRE Judge Demo Tour"
-          >
-            <Play size={10} fill="currentColor" />
-            <span>{isTourActive ? 'TOUR ACTIVE' : 'RUN JUDGE TOUR'}</span>
-          </button>
-        </Magnet>
-
-        {/* Real-time Grid Frequency Telemetry */}
-        <div className="telemetry-chip" title="Karnataka KPTCL/SLDC Live Frequency (Nominal 50.00 Hz)">
-          <Zap size={10} color="var(--cyan)" />
-          <span className="mono-nums" style={{ color: 'var(--text-pure)', fontWeight: 700 }}>
-            {gridFreq} Hz
-          </span>
+        {/* Real-time Grid Frequency */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '5px',
+          background: 'rgba(255, 255, 255, 0.04)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '6px',
+          padding: '4px 8px',
+          fontSize: '11px',
+          fontFamily: 'var(--font-mono)',
+          color: '#e6edf3'
+        }} title="Karnataka SLDC Grid Frequency">
+          <Zap size={11} color="#38bdf8" />
+          <span>{gridFreq} Hz</span>
         </div>
 
-        {/* Backend SRE Control Plane Status */}
-        <div 
-          className="telemetry-chip" 
-          title={backendOnline ? "OMNICARBON Bun/Node SRE Backend Connected on Port 3001" : "Static Client Mode Active"}
-          style={{
-            borderColor: backendOnline ? 'rgba(34, 197, 94, 0.4)' : 'rgba(255, 255, 255, 0.08)',
-            background: backendOnline ? 'rgba(34, 197, 94, 0.08)' : 'rgba(255, 255, 255, 0.03)'
-          }}
-        >
+        {/* Backend Status Pill */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '5px',
+          background: backendOnline ? 'rgba(35, 134, 54, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+          border: `1px solid ${backendOnline ? 'rgba(46, 160, 67, 0.4)' : 'rgba(255, 255, 255, 0.08)'}`,
+          borderRadius: '6px',
+          padding: '4px 8px',
+          fontSize: '10px',
+          fontWeight: 600,
+          color: backendOnline ? '#3fb950' : '#8b949e'
+        }} title={backendOnline ? "Bun/Node SRE Backend Connected on Port 3001" : "Static Client Mode"}>
           <span style={{
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            background: backendOnline ? '#22c55e' : '#64748b',
-            boxShadow: backendOnline ? '0 0 8px #22c55e' : 'none'
+            background: backendOnline ? '#3fb950' : '#6e7681',
+            boxShadow: backendOnline ? '0 0 6px #3fb950' : 'none'
           }} />
-          <span style={{ fontSize: '9px', fontWeight: 700, color: backendOnline ? '#22c55e' : 'var(--text-muted)' }}>
-            {backendOnline ? 'BACKEND :3001' : 'STATIC'}
-          </span>
+          <span>{backendOnline ? 'API :3001' : 'STATIC'}</span>
         </div>
 
-        {/* Audio Synthesizer with Equalizer Wave (edolus.com inspired) */}
-        <Magnet padding={40} magnetStrength={3} maxOffset={6}>
-          <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            style={{
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '8px',
-              color: soundEnabled ? 'var(--phosphor)' : 'var(--text-muted)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '4px 8px',
-              outline: 'none',
-              transition: 'all 0.15s ease'
-            }}
-            title={soundEnabled ? 'Mute Web Audio Synthesizer' : 'Unmute Web Audio Synthesizer'}
-          >
-            {soundEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
-            {soundEnabled && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '2px', height: '10px' }}>
-                <span style={{ width: '2px', height: '8px', background: 'var(--phosphor)', borderRadius: '1px', animation: 'smoothPulse 1.2s infinite ease-in-out' }} />
-                <span style={{ width: '2px', height: '12px', background: 'var(--phosphor)', borderRadius: '1px', animation: 'smoothPulse 1.6s infinite ease-in-out 0.2s' }} />
-                <span style={{ width: '2px', height: '6px', background: 'var(--phosphor)', borderRadius: '1px', animation: 'smoothPulse 1.4s infinite ease-in-out 0.4s' }} />
-              </div>
-            )}
-          </button>
-        </Magnet>
+        {/* Tour Demo Button */}
+        <button
+          onClick={onStartJudgeTour}
+          style={{
+            padding: '4px 11px',
+            borderRadius: '6px',
+            background: isTourActive ? '#238636' : 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            color: isTourActive ? '#ffffff' : '#f0f6fc',
+            fontSize: '11px',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+          title="Run 1-Click Code Clash Judge Demo Tour"
+        >
+          <Play size={10} fill="currentColor" />
+          <span>{isTourActive ? 'Touring...' : 'Judge Tour'}</span>
+        </button>
 
-        {/* System Heartbeat */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          fontFamily: 'var(--font-mono)',
-          fontSize: '11px',
-          color: 'var(--text-secondary)'
-        }}>
-          <span className="pulse-dot" />
-          <span style={{ color: 'var(--text-muted)' }}>{time}</span>
-          <span style={{ color: 'var(--phosphor)', fontWeight: 600 }}>{localFps || externalFps || '60.0'} FPS</span>
-        </div>
+        {/* Smooth AI Copilot Action Button */}
+        <button
+          onClick={onOpenCopilot}
+          style={{
+            padding: '4px 12px',
+            borderRadius: '6px',
+            background: 'linear-gradient(135deg, #1f6feb 0%, #238636 100%)',
+            border: 'none',
+            color: '#ffffff',
+            fontSize: '11px',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(31, 111, 235, 0.3)',
+            transition: 'transform 0.12s ease'
+          }}
+          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+          title="Open OmniAgent Decarbonization AI Copilot"
+        >
+          <Sparkles size={11} />
+          <span>AI Copilot</span>
+        </button>
+
+        {/* Audio Toggle */}
+        <button
+          onClick={() => setSoundEnabled(!soundEnabled)}
+          style={{
+            background: 'transparent',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '6px',
+            color: soundEnabled ? '#3fb950' : '#6e7681',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '5px 7px',
+            transition: 'all 0.15s ease'
+          }}
+          title={soundEnabled ? 'Mute Audio' : 'Unmute Audio'}
+        >
+          {soundEnabled ? <Volume2 size={12} /> : <VolumeX size={12} />}
+        </button>
       </div>
     </header>
   );

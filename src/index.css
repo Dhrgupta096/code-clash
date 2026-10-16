@@ -830,6 +830,28 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .edolus-spectrum-bar.b4 { animation: edolusEqualizerBounce 0.36s infinite ease-in-out 0.04s; }
 .edolus-spectrum-bar.b5 { animation: edolusEqualizerBounce 0.48s infinite ease-in-out 0.12s; }
 
+/* Clean UI Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+
 
 
 

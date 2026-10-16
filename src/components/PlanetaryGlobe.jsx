@@ -898,50 +898,46 @@ export default function PlanetaryGlobe({ onZoomCampus, playSound }) {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            padding: '8px 14px',
-            borderRadius: '999px',
-            background: isInspectorOpen ? 'rgba(56, 189, 248, 0.25)' : 'rgba(7, 9, 14, 0.85)',
-            backdropFilter: 'blur(20px)',
-            border: isInspectorOpen ? '1px solid var(--cyan)' : '1px solid rgba(56, 189, 248, 0.4)',
-            color: 'var(--cyan)',
+            gap: '6px',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            background: isInspectorOpen ? '#1f6feb' : '#161b22',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            color: '#f0f6fc',
             fontSize: '11px',
-            fontWeight: 700,
+            fontWeight: 600,
             cursor: 'pointer',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.2)'
+            transition: 'all 0.15s ease'
           }}
         >
-          <Radio size={13} className="animate-spin-slow" />
-          <span>{isInspectorOpen ? 'Close Satellite Recon' : 'Inspect in Google Maps'}</span>
-          <ExternalLink size={11} />
+          <Radio size={12} color={isInspectorOpen ? '#ffffff' : '#38bdf8'} />
+          <span>{isInspectorOpen ? 'Close Satellite Panel' : 'Google Satellite'}</span>
         </button>
       </div>
 
-      {/* Floating Center Interaction Callout */}
+      {/* Subtle Center Interaction Hint */}
       <div style={{
         position: 'absolute',
-        bottom: '84px',
+        bottom: '24px',
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
-        padding: '6px 16px',
-        borderRadius: '999px',
-        background: 'rgba(8, 10, 16, 0.82)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(212, 255, 0, 0.35)',
+        gap: '6px',
+        padding: '5px 12px',
+        borderRadius: '6px',
+        background: 'rgba(13, 17, 23, 0.85)',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
         fontSize: '11px',
-        color: 'var(--text-main)',
+        color: '#8b949e',
         fontFamily: 'var(--font-mono)',
         pointerEvents: 'none',
-        zIndex: 20,
-        boxShadow: '0 8px 24px rgba(0,0,0,0.6)'
+        zIndex: 20
       }}>
-        <span className="pulse-dot" />
-        <span style={{ letterSpacing: '0.04em' }}>
-          CLICK ANY POINT ON EARTH TO ACCESS GOOGLE MAPS SATELLITE • DRAG TO ROTATE
-        </span>
+        <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#38bdf8' }} />
+        <span>Click anywhere on globe to inspect coordinates in Google Maps</span>
       </div>
 
       {/* Floating Left HUD: Global Grid Nodes Selector */}

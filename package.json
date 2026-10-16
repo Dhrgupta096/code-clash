@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "lucide-react": "^1.57.0",
+    "pptxgenjs": "^4.0.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "three": "^0.186.1"
