@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Building2, Eye, Sliders, BookOpen, Volume2, VolumeX, Zap, Play, Sparkles, GitBranch, Presentation, User } from 'lucide-react';
+import { Globe, Building2, Eye, Sliders, BookOpen, Volume2, VolumeX, Zap, Play, Sparkles, GitBranch, Maximize, User } from 'lucide-react';
 import { ApiClient } from '../services/apiClient';
 
 export default function TopNav({
@@ -280,30 +280,33 @@ export default function TopNav({
           <span>{currentUser?.name ? currentUser.name.split(' ')[0] : 'Sign In'}</span>
         </button>
 
-        {/* Edolus-Style Cinematic PPT Deck Button */}
+        {/* Native Fullscreen Mission Control Toggle */}
         <button
-          onClick={onOpenPresentation}
+          onClick={() => {
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+              document.exitFullscreen().catch(() => {});
+            }
+          }}
           style={{
-            padding: '4px 11px',
+            padding: '4px 8px',
             borderRadius: '6px',
-            background: 'rgba(245, 158, 11, 0.12)',
-            border: '1px solid rgba(245, 158, 11, 0.35)',
-            color: '#fbbf24',
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            color: '#8b949e',
             fontSize: '11px',
-            fontWeight: 700,
-            fontFamily: 'var(--font-mono, monospace)',
+            cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            cursor: 'pointer',
+            gap: '4px',
             transition: 'all 0.15s ease'
           }}
-          title="Open Edolus-Style Cinematic PPT Slide Deck (P)"
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.2)'; e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.5)'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(245, 158, 11, 0.12)'; e.currentTarget.style.borderColor = 'rgba(245, 158, 11, 0.35)'; }}
+          title="Toggle Fullscreen Mission Control Mode (F11)"
+          onMouseEnter={e => { e.currentTarget.style.color = '#f0f6fc'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#8b949e'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)'; }}
         >
-          <Presentation size={12} />
-          <span>EDOLUS PPT</span>
+          <Maximize size={12} />
         </button>
 
         {/* Tour Demo Button */}
